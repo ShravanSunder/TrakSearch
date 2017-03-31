@@ -1,0 +1,25 @@
+﻿<Window x:Class="Id3Search.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Id3Search"
+        mc:Ignorable="d"
+        Title="DJ Track Finder" Height="600" Width="800">
+    <Grid>
+        <DockPanel HorizontalAlignment="Stretch" Margin="1,1,1,1" VerticalAlignment="Stretch">
+            <DockPanel DockPanel.Dock="Top">
+                <Button Name="FolderButton" DockPanel.Dock="Right" Click="FolderButton_Click" Padding="6,2,6,2">Folder</Button>
+                <Button Name="SearchButton" DockPanel.Dock="Right" Click="SearchButton_Click" Padding="6,2,6,2">Search</Button>
+                <Button Name="CancelButton" DockPanel.Dock="Right" Click="CancelButton_Click" Padding="3,2,3,2">X</Button>
+                <TextBox Name="SearchBox" KeyDown="SearchBox_KeyDown"></TextBox>
+                
+            </DockPanel>
+            <DataGrid Name="MusicData" AlternatingRowBackground="LightGray" AlternationCount="2" MouseDoubleClick="MusicData_MouseDoubleClick">
+                
+            </DataGrid>
+            <Button Name="Folder2Button" DockPanel.Dock="Right" Click="FolderButton_Click" Padding="6,2,6,2">Pick Folder</Button>
+            
+        </DockPanel>
+    </Grid>
+</Window>

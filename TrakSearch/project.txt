@@ -1,0 +1,25 @@
+====
+RC1
+====
+
+Lib
+- scans for files
+- Reads Tags: Artist, Publisher, Key, album, title, comments
+- loads it into memory
+- no pics
+- creates array
+
+UI
+- full search (quotes, NOT:, AND, OR, default and)
+- parameterized search
+
+====
+RC2
+====
+Lib
+- sqlite
+- datemodfieid scan
+
+UI
+- tag search in one string
+- 

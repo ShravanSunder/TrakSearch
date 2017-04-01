@@ -1,7 +1,7 @@
-﻿<Application x:Class="Id3Search.App"
+﻿<Application x:Class="TrakSearch.App"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:local="clr-namespace:Id3Search"
+             xmlns:local="clr-namespace:TrakSearch"
              StartupUri="MainWindow.xaml">
     <Application.Resources>
          

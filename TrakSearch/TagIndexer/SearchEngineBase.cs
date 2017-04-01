@@ -13,9 +13,9 @@ using System.Linq;
 
 namespace Shravan.DJ.TagIndexer
 {
-	public abstract class LuceneInterface
+	public abstract class SearchEngineBase
 	{
-		public LuceneInterface()
+		public SearchEngineBase()
 		{
 
 		}

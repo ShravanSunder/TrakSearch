@@ -7,7 +7,7 @@
         mc:Ignorable="d"
         Title="DJ Trak Search" Height="600" Width="800"
         Style="{StaticResource {x:Type Window}}"
-        >
+        Icon="./Resources/icon.png">
     <Grid>
         <DockPanel HorizontalAlignment="Stretch" Margin="1,1,1,1" VerticalAlignment="Stretch">
             <DockPanel DockPanel.Dock="Top">

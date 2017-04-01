@@ -33,13 +33,13 @@ namespace Shravan.DJ.TagIndexer.Data
 		[System.ComponentModel.Browsable(false)]
 		public string Index { get; private set; }
 
-		public static List<string> Relevance { get; } = new List<string>()
+		public static List<string> Fields { get; } = new List<string>()
 		{
 			"Title",
 			"Artist",
+			"Comment",
 			"BPM",
 			"Key",
-			"Comments",
 			"Energy",
 			"Album"
 		};

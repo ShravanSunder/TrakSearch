@@ -14,7 +14,7 @@ namespace DJ.TrakSearch
 	public partial class MainWindow : Window
 	{
 		TagParser AllTagData = new TagParser();
-		SearchEngine Search = new SearchEngine();
+		SearchEngineService Search = new SearchEngineService();
 
 		public MainWindow()
 		{
@@ -47,7 +47,7 @@ namespace DJ.TrakSearch
 
 		private void SearchMusic(string text)
 		{
-			var result = SearchEngine.Search(text);
+			var result = SearchEngineService.Search(text);
 			UpdateItemSource(result);
 		}
 
@@ -93,7 +93,7 @@ namespace DJ.TrakSearch
 
 				AllTagData.IndexDirectory(folder);
 
-				SearchEngine.AddUpdateLuceneIndex(AllTagData.tagList.AsEnumerable());
+				SearchEngineService.AddUpdateLuceneIndex(AllTagData.tagList.AsEnumerable());
 				this.MusicData.ItemsSource = AllTagData.tagList;
 				this.MusicData.Items.Refresh();
 			}

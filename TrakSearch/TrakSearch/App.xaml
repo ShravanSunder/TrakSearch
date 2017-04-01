@@ -1,7 +1,7 @@
-﻿<Application x:Class="TrakSearch.App"
+﻿<Application x:Class="DJ.TrakSearch.App"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:local="clr-namespace:TrakSearch"
+             xmlns:local="clr-namespace:DJ.TrakSearch"
              StartupUri="MainWindow.xaml">
     <Application.Resources>
          

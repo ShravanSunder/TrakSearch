@@ -25,9 +25,9 @@ namespace Shravan.DJ.TagIndexer.Data
 		public string Album { get; private set; }
 		public string FullPath { get; private set; }
 
-		[System.ComponentModel.Browsable(false)]
 		[System.ComponentModel.Bindable(false)]
-		public dynamic Data => _innerData;
+		[System.ComponentModel.Browsable(false)]
+		public dynamic Data { get { return _innerData; } set { value = _innerData; } }
 
 		[System.ComponentModel.Bindable(false)]
 		[System.ComponentModel.Browsable(false)]
@@ -44,7 +44,7 @@ namespace Shravan.DJ.TagIndexer.Data
 			"Album"
 		};
 
-		
+
 
 
 		public Id3TagData(string fullPath, TagLib.Id3v2.Tag metaData)
@@ -81,8 +81,8 @@ namespace Shravan.DJ.TagIndexer.Data
 					data.Artist = metaData.Performers.FirstOrDefault();
 					data.Key = metaData.FirstOrDefault(f => f.FrameId == ByteVector.FromString("TKEY", StringType.UTF8)).ToString();
 				}
-				
-				
+
+
 				Title = data.Title;
 				Album = data.Album;
 				Energy = data.Energy;
@@ -96,7 +96,7 @@ namespace Shravan.DJ.TagIndexer.Data
 			}
 			catch
 			{
-				_innerData = (IDictionary<string, object>) new ExpandoObject();
+				_innerData = (IDictionary<string, object>)new ExpandoObject();
 			}
 		}
 	}

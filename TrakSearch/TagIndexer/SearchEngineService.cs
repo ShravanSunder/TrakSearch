@@ -29,9 +29,10 @@ namespace Shravan.DJ.TagIndexer
 
 			var bracketKeys = new List<string>() { "(", ")", "\\(\\)" };
 			var logicalKeys = new List<string>() { "+", "-" };
-			var restrictedKeys = new List<string>() { "*", "?", "~" };
+			var restrictedKeys = new List<string>() { "*", "?", "~", "\"" };
 			//var removeKeys = new List<string>() { "AND", "OR", "NOT" };
 			restrictedKeys.AddRange(logicalKeys);
+			restrictedKeys.AddRange(bracketKeys);
 			restrictedKeys.AddRange(Id3TagData.Fields.Select(s => s + ":"));
 
 			search = search.Length > 100 ? search.Substring(0, 99) : search;

@@ -6,6 +6,9 @@ using System.Windows.Input;
 using Shravan.DJ.TagIndexer;
 using Shravan.DJ.TagIndexer.Data;
 using System.Windows.Controls;
+using System.Diagnostics;
+using System.Threading.Tasks;
+using System.Threading;
 
 namespace DJ.TrakSearch
 {
@@ -16,15 +19,26 @@ namespace DJ.TrakSearch
 	{
 		TagParser AllTagData = new TagParser();
 		SearchEngineService Search = new SearchEngineService();
+		Stopwatch KeyTimer = new Stopwatch();
+		Stopwatch WindowTimer = new Stopwatch();
+		bool Searching = false;
+
+		Mutex SearchingMutex = new Mutex();
 
 		public MainWindow()
 		{
 			try
 			{
+				System.Diagnostics.Process.GetCurrentProcess().PriorityClass = System.Diagnostics.ProcessPriorityClass.BelowNormal;
+
+
 				InitializeComponent();
 
 				this.MusicData.ItemsSource = new List<Id3TagData>();
 				this.MusicData.Items.Refresh();
+
+				KeyTimer.Start();
+				WindowTimer.Start();
 
 				StyleDataGrid();
 			}
@@ -35,36 +49,70 @@ namespace DJ.TrakSearch
 
 		}
 
-		private void SearchBox_KeyDown(object sender, KeyEventArgs e)
+		private void SearchBox_KeyUp(object sender, KeyEventArgs e)
 		{
 			if (e.Key == Key.Enter)
 			{
 				SearchMusic(SearchBox.Text);
+				KeyTimer.Restart();
 			}
 			else if (e.Key == Key.Escape)
 			{
 				SearchBox.Clear();
 				UpdateItemSource();
 			}
+			else if (!(e.Key < Key.A) || (e.Key > Key.Z)
+				|| ((e.Key == Key.V || e.Key == Key.X) && (Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control)
+				|| (e.Key == Key.Back || e.Key == Key.Delete)
+				)
+			{
+				var s = SearchBox.Text;
+
+				if (string.IsNullOrEmpty(s))
+				{
+					SearchBox.Clear();
+					UpdateItemSource();
+				}
+				else if (KeyTimer.ElapsedMilliseconds > 250 && Searching == false)
+				{
+					KeyTimer.Restart();
+					SearchMusic(s);
+				}
+			}
 		}
 
 		private void SearchMusic(string text)
 		{
-			var result = new List<Id3TagData>().AsEnumerable();
+			var task = new Task(() =>
+			{
+				SearchingMutex.WaitOne();
+				Searching = true;
 
-			try
-			{
-				result = SearchEngineService.Search(text);
-			}
-			catch (Exception ex)
-			{
-				Console.WriteLine(ex.ToString());
-			}
+				var result = new List<Id3TagData>().AsEnumerable();
 
-			if (!AllTagData.tagList.IsEmpty)
-			{
-				UpdateItemSource(result);
-			}
+				try
+				{
+					result = SearchEngineService.Search(text);
+				}
+				catch (Exception ex)
+				{
+					Console.WriteLine(ex.ToString());
+				}
+
+				if (!AllTagData.tagList.IsEmpty)
+				{
+					this.Dispatcher.Invoke(() =>
+					{
+						UpdateItemSource(result);
+					});
+				}
+
+
+				Searching = false;
+				SearchingMutex.ReleaseMutex();
+			});
+
+			task.Start();
 
 		}
 
@@ -72,8 +120,11 @@ namespace DJ.TrakSearch
 		{
 			data = data ?? AllTagData.tagList;
 
-			MusicData.ItemsSource = data;
-			MusicData.Items.Refresh();
+			this.Dispatcher.Invoke(() =>
+			{
+				MusicData.ItemsSource = data;
+				MusicData.Items.Refresh();
+			});
 		}
 
 		private void SearchButton_Click(object sender, RoutedEventArgs e)
@@ -170,7 +221,15 @@ namespace DJ.TrakSearch
 
 		private void Window_SizeChanged(object sender, SizeChangedEventArgs e)
 		{
-			StyleDataGrid();
+			if (WindowTimer.ElapsedMilliseconds > 250)
+			{
+				this.Dispatcher.Invoke(() =>
+				{
+					StyleDataGrid();
+					WindowTimer.Restart();
+				});
+			}
 		}
+
 	}
 }

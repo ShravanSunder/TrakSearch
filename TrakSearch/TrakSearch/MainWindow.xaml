@@ -18,7 +18,7 @@
                 <Button Name="FolderButton" DockPanel.Dock="Right" Click="FolderButton_Click" Padding="6,2,6,2">Folder</Button>
                 <Button Name="SearchButton" DockPanel.Dock="Right" Click="SearchButton_Click" Padding="6,2,6,2">Search</Button>
                 <Button Name="CancelButton" DockPanel.Dock="Right" Click="CancelButton_Click" Padding="3,2,3,2">X</Button>
-                <TextBox Name="SearchBox" KeyDown="SearchBox_KeyDown"></TextBox>
+                <TextBox Name="SearchBox" KeyUp="SearchBox_KeyUp" FontSize="14" ></TextBox>
                 
             </DockPanel>
             <Grid>

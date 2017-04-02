@@ -5,6 +5,7 @@ using System.Windows;
 using System.Windows.Input;
 using Shravan.DJ.TagIndexer;
 using Shravan.DJ.TagIndexer.Data;
+using System.Windows.Controls;
 
 namespace DJ.TrakSearch
 {
@@ -24,6 +25,8 @@ namespace DJ.TrakSearch
 
 				this.MusicData.ItemsSource = new List<Id3TagData>();
 				this.MusicData.Items.Refresh();
+
+				StyleDataGrid();
 			}
 			catch (Exception ex)
 			{
@@ -97,14 +100,19 @@ namespace DJ.TrakSearch
 			FolderButton.Content = "Loading...";
 			Folder2Button.Content = "Loading...";
 
-
 			var dialog = new WPFFolderBrowser.WPFFolderBrowserDialog("Select Music Folder");
 			var done = dialog.ShowDialog(this);
 			//AllTagData.IndexDirectory(@"H:\Zouk");
 
 			if (done == true)
 			{
+				AllTagData.tagList = new System.Collections.Concurrent.ConcurrentBag<Id3TagData>();
+				this.MusicData.ItemsSource = new List<Id3TagData>();
+				this.MusicData.Items.Refresh();
+
 				var folder = dialog.FileName;
+
+				SearchEngineService.ClearLuceneIndex();
 
 				AllTagData.IndexDirectory(folder);
 
@@ -118,6 +126,51 @@ namespace DJ.TrakSearch
 			FolderButton.Content = "Folder";
 			FolderButton.IsEnabled = true;
 
+		}
+
+		public void StyleDataGrid()
+		{
+			var dataGrid = MusicData;
+
+			var largeColumn = new List<string> { "Comment", "FullPath" };
+			var smallColumn = new List<string> { "BPM", "Key", "Energy", };
+			var normalColumn = new List<string> { "Title", "Artist", "Album" };
+
+			var windowSize = this.RenderSize.Width > 600 ? this.RenderSize.Width : 600;
+
+			foreach (DataGridColumn c in dataGrid.Columns)
+			{
+				var header = c.Header;
+				if (largeColumn.Any(w => c.Header.ToString() == w))
+				{
+					c.MaxWidth = windowSize * 0.5;
+					if (c.Width.Value > c.MaxWidth)
+						c.Width = new DataGridLength(c.MaxWidth, DataGridLengthUnitType.Star, c.Width.DesiredValue, c.MaxWidth);
+
+				}
+				else if (normalColumn.Any(w => c.Header.ToString() == w))
+				{
+					c.MaxWidth = windowSize * 0.15;
+
+					if (c.Width.DisplayValue > c.MaxWidth)
+					{
+						c.Width = new DataGridLength(c.MaxWidth, DataGridLengthUnitType.Star, c.Width.DesiredValue, c.MaxWidth);
+
+					}
+				}
+				else if (smallColumn.Any(w => c.Header.ToString() == w))
+				{
+					c.MaxWidth = windowSize * 0.05;
+
+					if (c.Width.Value > c.MaxWidth)
+						c.Width = new DataGridLength(c.MaxWidth, DataGridLengthUnitType.Star, c.Width.DesiredValue, c.MaxWidth);
+				}
+			}
+		}
+
+		private void Window_SizeChanged(object sender, SizeChangedEventArgs e)
+		{
+			StyleDataGrid();
 		}
 	}
 }

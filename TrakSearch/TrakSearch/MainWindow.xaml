@@ -7,7 +7,11 @@
         mc:Ignorable="d"
         Title="DJ Trak Search" Height="600" Width="800"
         Style="{StaticResource {x:Type Window}}"
-        Icon="./Resources/icon.png">
+        Icon="./Resources/icon.png"
+        SizeChanged="Window_SizeChanged">
+    <Window.Resources>
+        <SolidColorBrush x:Key="LightBlack" Color="#282828" />
+    </Window.Resources>
     <Grid>
         <DockPanel HorizontalAlignment="Stretch" Margin="1,1,1,1" VerticalAlignment="Stretch">
             <DockPanel DockPanel.Dock="Top">
@@ -18,7 +22,9 @@
                 
             </DockPanel>
             <Grid>
-                <DataGrid Name="MusicData" MouseDoubleClick="MusicData_MouseDoubleClick">
+                <DataGrid Name="MusicData" MouseDoubleClick="MusicData_MouseDoubleClick" 
+                          AlternatingRowBackground="{StaticResource LightBlack}"
+                          >
                 
                 </DataGrid>
                 <Button Name="Folder2Button" Click="FolderButton_Click" Padding="6,2,6,2">Pick Folder</Button>

@@ -27,14 +27,14 @@ namespace DJ.TrakSearch
 			}
 			catch (Exception ex)
 			{
-				
+
 			}
 
 		}
 
 		private void SearchBox_KeyDown(object sender, KeyEventArgs e)
 		{
-			if (e.Key==Key.Enter)
+			if (e.Key == Key.Enter)
 			{
 				SearchMusic(SearchBox.Text);
 			}
@@ -47,7 +47,16 @@ namespace DJ.TrakSearch
 
 		private void SearchMusic(string text)
 		{
-			var result = SearchEngineService.Search(text);
+			var result = new List<Id3TagData>().AsEnumerable();
+
+			try
+			{
+				result = SearchEngineService.Search(text);
+			}
+			catch (Exception ex)
+			{
+				Console.WriteLine(ex.ToString());
+			}
 			UpdateItemSource(result);
 		}
 

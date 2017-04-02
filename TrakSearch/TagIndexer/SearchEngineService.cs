@@ -22,58 +22,106 @@ namespace Shravan.DJ.TagIndexer
 		}
 
 
-		public static IEnumerable<Id3TagData> Search(string search, string fieldName = "")
+		public static IEnumerable<Id3TagData> Search(string search)
 		{
 			if (string.IsNullOrEmpty(search))
 				return new List<Id3TagData>();
 
-			var logicalKeys = new List<string>() { "AND", "OR", "NOT", "+", "-" };
+			var bracketKeys = new List<string>() { "(", ")", "\\(\\)" };
+			var logicalKeys = new List<string>() { "+", "-" };
 			var restrictedKeys = new List<string>() { "*", "?", "~" };
+			//var removeKeys = new List<string>() { "AND", "OR", "NOT" };
 			restrictedKeys.AddRange(logicalKeys);
 			restrictedKeys.AddRange(Id3TagData.Fields.Select(s => s + ":"));
 
-			var terms = Regex.Matches(search, @"[\""].+?[\""]|[^ ]+")
-					 .Cast<Match>()
-					 .Select(m => m.Value)
-					 .Where(x => !string.IsNullOrEmpty(x)).ToList();
+			search = search.Length > 100 ? search.Substring(0, 99) : search;
 
-			//var logicalTerms = new List<string>();
-
-			//	Regex.Split(search, @"(?=AND|OR|NOT)");
-
-
+			var specialTerms = FindSpecialTerms(search);
+			var searchTerm = search;
+			foreach (var s in specialTerms)
+			{
+				searchTerm = searchTerm.Replace(s.Trim(), "");
+			}
 
 			var query = new BooleanQuery();
-			var keyInputs = CreateKeyQueries(terms, query).ToList();
-			var bpmInputs = CreateBpmQueries(terms, query).ToList();
-
-			var inputs = terms
-				.Where(t =>
-				{
-					return bpmInputs.Any(b => b.Equals(t)) || keyInputs.Any(k => k.Equals(t)) ? false : true;
-				})
-				.Select(s =>
-				{
-					if (restrictedKeys.Any(w => s.Contains(w)))
-						return s;
-					else
-						return s + "*";
-				});
-
-
-
-
-			var input = string.Join(" ", inputs);
-			query.Add(CreateQuery(input, fieldName), Occur.MUST);
-
-
-
+			if (!string.IsNullOrEmpty(searchTerm.Trim()))
+				CreateQueryWithWildCard(restrictedKeys, searchTerm, query);
+			CreateKeyQueries(specialTerms, query);
+			CreateBpmQueries(specialTerms, query);
 
 
 
 			return SearchInternal(query);
 
 		}
+
+		private static void CreateQueryWithWildCard(List<string> restrictedKeys, string searchTerms, BooleanQuery query)
+		{
+			var terms = Regex.Matches(searchTerms, @"[\""].+?[\""]|[^ ]+")
+									 .Cast<Match>()
+									 .Select(m => m.Value)
+									 .Where(x => !string.IsNullOrEmpty(x)).ToList();
+
+			var wildTerm = string.Join(" ", terms
+					.Select(s =>
+					{
+						if (restrictedKeys.Any(w => s.Contains(w)))
+							return s;
+						else
+							return s + "*";
+					}));
+
+			query.Add(CreateQuery(wildTerm), Occur.MUST);
+
+		}
+
+		private static List<string> FindSpecialTerms(string search)
+		{
+			var specialTerms = new[] { "BPM:", "Key:" };
+			var terms = new List<string>();
+
+			foreach (var s in specialTerms)
+			{
+
+				var pattern = @"(" + s + @")[^\(\)\""]+?($|\s)";
+				terms.AddRange(
+					Regex.Matches(search, pattern)
+						 .Cast<Match>()
+						 .Select(m => m.Value)
+						 .Where(x => !string.IsNullOrEmpty(x)).ToList());
+
+				pattern = @"(" + s + @"\"").+?[""]";
+				terms.AddRange(
+					Regex.Matches(search, pattern)
+						 .Cast<Match>()
+						 .Select(m => m.Value)
+						 .Where(x => !string.IsNullOrEmpty(x)).ToList());
+
+				pattern = @"(" + s + @"\().+?[)]";
+				terms.AddRange(
+					Regex.Matches(search, @"(" + s + @"\().+?[)]")
+						 .Cast<Match>()
+						 .Select(m => m.Value)
+						 .Where(x => !string.IsNullOrEmpty(x)).ToList());
+			}
+
+			return terms;
+		}
+
+		private static Occur GetBooleanOp(string str)
+		{
+			switch (str)
+			{
+				case "+":
+					return Occur.MUST;
+				case "-":
+					return Occur.MUST_NOT;
+				default:
+					return Occur.SHOULD;
+			}
+		}
+
+
 
 		private static IEnumerable<string> CreateKeyQueries(List<string> terms, BooleanQuery query)
 		{
@@ -236,6 +284,7 @@ namespace Shravan.DJ.TagIndexer
 		{
 			var hits_limit = 500;
 			var analyzer = new StandardAnalyzer(LUCENE_VER);
+
 
 			using (var searcher = new IndexSearcher(_directory, true))
 			{

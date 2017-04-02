@@ -5,6 +5,7 @@ using Lucene.Net.QueryParsers;
 using Lucene.Net.Search;
 using Lucene.Net.Store;
 using Lucene.Net.Util;
+using Shravan.DJ.TagIndexer.Data;
 using System;
 using System.Collections.Generic;
 using System.Dynamic;
@@ -38,14 +39,19 @@ namespace Shravan.DJ.TagIndexer
 		}
 
 
-		public static void ClearLuceneIndexRecord(string fullPath)
+		public static void ClearLuceneIndexRecord(Id3TagData tag)
+		{
+			ClearLuceneIndexRecord(tag.Index);
+		}
+
+		public static void ClearLuceneIndexRecord(string Index)
 		{
 			// init lucene
 			var analyzer = new StandardAnalyzer(LUCENE_VER);
 			using (var writer = new IndexWriter(_directory, analyzer, IndexWriter.MaxFieldLength.UNLIMITED))
 			{
 				// remove older index entry
-				var searchQuery = new TermQuery(new Term("Index", fullPath));
+				var searchQuery = new TermQuery(new Term("Index", Index));
 				writer.DeleteDocuments(searchQuery);
 
 				// close handles
@@ -87,7 +93,14 @@ namespace Shravan.DJ.TagIndexer
 			}
 			catch (ParseException)
 			{
-				query = parser.Parse(QueryParser.Escape(searchQuery.Trim()));
+				try
+				{
+					query = parser.Parse(QueryParser.Escape(searchQuery.Trim()));
+				}
+				catch
+				{
+					query = new BooleanQuery();
+				}
 			}
 			return query;
 		}

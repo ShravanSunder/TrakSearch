@@ -195,13 +195,15 @@ namespace Shravan.DJ.TagIndexer
 		{
 			// remove older index entry
 
-			var searchQuery = new TermQuery(new Term("Index", id3.FullPath));
+			var searchQuery = new TermQuery(new Term("Index", id3.Index));
 			writer.DeleteDocuments(searchQuery);
 
 			// add new index entry
 			var doc = new Document();
 
-			doc.Add(new Field("Index", id3.FullPath, Field.Store.YES, Field.Index.NO));
+			doc.Add(new Field("Index", id3.Index, Field.Store.YES, Field.Index.NOT_ANALYZED, Field.TermVector.NO));
+			doc.Add(new Field("FullPath", id3.FullPath, Field.Store.YES, Field.Index.NO, Field.TermVector.NO));
+			doc.Add(new Field("DateModified", DateTools.DateToString(id3.DateModified, DateTools.Resolution.SECOND), Field.Store.YES, Field.Index.NO, Field.TermVector.NO));
 			foreach (var kv in id3.Data)
 			{
 				if (kv.Key == "BPM")
@@ -301,7 +303,7 @@ namespace Shravan.DJ.TagIndexer
 
 		private static Id3TagData MapLuceneDocumentToData(Document doc, double? score = null)
 		{
-			var fullPath = doc.Get("Index");
+			var fullPath = doc.Get("FullPath");
 			IDictionary<string, object> dic = new ExpandoObject();
 			foreach (var field in doc.GetFields())
 			{

@@ -60,7 +60,7 @@ namespace Shravan.DJ.TagIndexer
 				try
 				{
 					var file = new TagLib.Mpeg.File(fileInfo.FullName, ReadStyle.None);
-					var data = new Id3TagData(fileInfo.FullName, new Tag(file, 0)); ;
+					var data = new Id3TagData(fileInfo, new Tag(file, 0)); ;
 
 					if (!string.IsNullOrEmpty(data.Title) && !string.IsNullOrEmpty(data.Artist))
 						tagList.Add(data);

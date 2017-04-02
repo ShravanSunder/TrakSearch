@@ -27,7 +27,7 @@ namespace DJ.TrakSearch
 			}
 			catch (Exception ex)
 			{
-
+				Console.WriteLine(ex.ToString());
 			}
 
 		}
@@ -57,7 +57,12 @@ namespace DJ.TrakSearch
 			{
 				Console.WriteLine(ex.ToString());
 			}
-			UpdateItemSource(result);
+
+			if (!AllTagData.tagList.IsEmpty)
+			{
+				UpdateItemSource(result);
+			}
+
 		}
 
 		private void UpdateItemSource(IEnumerable<Id3TagData> data = null)
@@ -88,8 +93,9 @@ namespace DJ.TrakSearch
 		private void FolderButton_Click(object sender, RoutedEventArgs e)
 		{
 			FolderButton.IsEnabled = false;
-			Folder2Button.Visibility = Visibility.Hidden;
 			Folder2Button.IsEnabled = false;
+			FolderButton.Content = "Loading...";
+			Folder2Button.Content = "Loading...";
 
 
 			var dialog = new WPFFolderBrowser.WPFFolderBrowserDialog("Select Music Folder");
@@ -103,11 +109,15 @@ namespace DJ.TrakSearch
 				AllTagData.IndexDirectory(folder);
 
 				SearchEngineService.AddUpdateLuceneIndex(AllTagData.tagList.AsEnumerable());
-				this.MusicData.ItemsSource = AllTagData.tagList;
+
+				Folder2Button.Visibility = Visibility.Hidden;
+				this.MusicData.ItemsSource = AllTagData.tagList.Cast<Id3TagDataBase>();
 				this.MusicData.Items.Refresh();
 			}
 
+			FolderButton.Content = "Folder";
 			FolderButton.IsEnabled = true;
+
 		}
 	}
 }

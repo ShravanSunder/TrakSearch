@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Dynamic;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using TagLib;
@@ -9,29 +10,21 @@ using TagLib.Id3v2;
 
 namespace Shravan.DJ.TagIndexer.Data
 {
-	public class Id3TagData //: TagLib.Id3v2.Tag
+	public class Id3TagData : Id3TagDataBase
 	{
 		/// <summary>
 		/// ExpandoObject
 		/// </summary>
 		protected dynamic _innerData;
 
-		public string Title { get; private set; }
-		public string Artist { get; private set; }
-		public string Key { get; private set; }
-		public string Energy { get; private set; }
-		public string BPM { get; private set; }
-		public string Comment { get; private set; }
-		public string Album { get; private set; }
-		public string FullPath { get; private set; }
 
-		[System.ComponentModel.Bindable(false)]
-		[System.ComponentModel.Browsable(false)]
-		public dynamic Data { get { return _innerData; } set { value = _innerData; } }
+		internal dynamic Data { get { return _innerData; } set { value = _innerData; } }
 
-		[System.ComponentModel.Bindable(false)]
-		[System.ComponentModel.Browsable(false)]
-		public string Index { get; private set; }
+		internal string Index { get; set; }
+		internal DateTime DateModified { get; set; }
+		internal bool MarkPurgeRecord { get; set; }
+
+
 
 		public static List<string> Fields { get; } = new List<string>()
 		{
@@ -46,10 +39,11 @@ namespace Shravan.DJ.TagIndexer.Data
 
 
 
-
-		public Id3TagData(string fullPath, TagLib.Id3v2.Tag metaData)
+		public Id3TagData(System.IO.FileInfo file, TagLib.Id3v2.Tag metaData)
 		{
-			FullPath = fullPath;
+			FullPath = file.FullName;
+			DateModified = file.LastAccessTimeUtc;
+			Index = HashIndex(file.FullName);
 
 			PopulateFields(metaData, null);
 		}
@@ -69,6 +63,23 @@ namespace Shravan.DJ.TagIndexer.Data
 
 			try
 			{
+				if (data != null)
+				{
+
+					if (((IDictionary<string, object>)data).Keys.Contains("Index"))
+					{
+						Index = data.Index;
+					}
+					else
+					{
+						Index = HashIndex(FullPath);
+					}
+
+					if (((IDictionary<string, object>)data).Keys.Contains("DateModified"))
+					{
+						DateModified = Lucene.Net.Documents.DateTools.StringToDate(data.DateModified);
+					}
+				}
 				if (metaData != null)
 				{
 					data = new ExpandoObject();
@@ -99,5 +110,25 @@ namespace Shravan.DJ.TagIndexer.Data
 				_innerData = (IDictionary<string, object>)new ExpandoObject();
 			}
 		}
+
+		public static string HashIndex(string fullPath)
+		{
+			var md5 = MD5.Create();
+			var hash = md5.ComputeHash(new UTF8Encoding().GetBytes(fullPath));
+			return BitConverter.ToString(hash).Replace("-", "");
+		}
+
+		public bool IndexEqualsPath(string fullPath)
+		{
+			var input = HashIndex(fullPath);
+
+			return input.Equals(Index);
+		}
+
+		public bool IndexEqualsHash(string hash)
+		{
+			return hash.Equals(Index);
+		}
+
 	}
 }

@@ -17,11 +17,13 @@
                 <TextBox Name="SearchBox" KeyDown="SearchBox_KeyDown"></TextBox>
                 
             </DockPanel>
-            <DataGrid Name="MusicData" MouseDoubleClick="MusicData_MouseDoubleClick">
+            <Grid>
+                <DataGrid Name="MusicData" MouseDoubleClick="MusicData_MouseDoubleClick">
                 
-            </DataGrid>
-            <Button Name="Folder2Button" DockPanel.Dock="Right" Click="FolderButton_Click" Padding="6,2,6,2">Pick Folder</Button>
-            
+                </DataGrid>
+                <Button Name="Folder2Button" Click="FolderButton_Click" Padding="6,2,6,2">Pick Folder</Button>
+            </Grid>
+
         </DockPanel>
     </Grid>
 </Window>

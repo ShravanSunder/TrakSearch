@@ -2,6 +2,7 @@
 using Lucene.Net.Documents;
 using Lucene.Net.Index;
 using Lucene.Net.QueryParsers;
+using Lucene.Net.QueryParsers.Classic;
 using Lucene.Net.Search;
 using Lucene.Net.Store;
 using Lucene.Net.Util;
@@ -22,7 +23,7 @@ namespace Shravan.DJ.TagIndexer
 		}
 
 
-		protected static Lucene.Net.Util.Version LUCENE_VER = Lucene.Net.Util.Version.LUCENE_30;
+		protected static Lucene.Net.Util.LuceneVersion LUCENE_VER = Lucene.Net.Util.LuceneVersion.LUCENE_48;
 
 		protected static string _luceneDir = System.IO.Path.GetTempPath() + @"\Lucene\";
 		protected static FSDirectory _directoryTemp;
@@ -48,14 +49,14 @@ namespace Shravan.DJ.TagIndexer
 		{
 			// init lucene
 			var analyzer = new StandardAnalyzer(LUCENE_VER);
-			using (var writer = new IndexWriter(_directory, analyzer, IndexWriter.MaxFieldLength.UNLIMITED))
+			using (var writer = new IndexWriter(_directory, new IndexWriterConfig (LUCENE_VER, analyzer)))
 			{
 				// remove older index entry
 				var searchQuery = new TermQuery(new Term("Index", Index));
 				writer.DeleteDocuments(searchQuery);
 
 				// close handles
-				analyzer.Close();
+				//analyzer.Close();
 				writer.Dispose();
 			}
 		}
@@ -65,13 +66,13 @@ namespace Shravan.DJ.TagIndexer
 			try
 			{
 				var analyzer = new StandardAnalyzer(LUCENE_VER);
-				using (var writer = new IndexWriter(_directory, analyzer, true, IndexWriter.MaxFieldLength.UNLIMITED))
+				using (var writer = new IndexWriter(_directory, new IndexWriterConfig(LUCENE_VER, analyzer)))
 				{
 					// remove older index entries
 					writer.DeleteAll();
 
 					// close handles
-					analyzer.Close();
+					//analyzer.Close();
 					writer.Dispose();
 				}
 			}

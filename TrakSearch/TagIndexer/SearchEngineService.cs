@@ -2,6 +2,7 @@
 using Lucene.Net.Documents;
 using Lucene.Net.Index;
 using Lucene.Net.QueryParsers;
+using Lucene.Net.QueryParsers.Classic;
 using Lucene.Net.Search;
 using Shravan.DJ.TagIndexer.Data;
 using System;
@@ -9,7 +10,8 @@ using System.Collections.Generic;
 using System.Dynamic;
 using System.Linq;
 using System.Text.RegularExpressions;
-using Version = Lucene.Net.Util.Version;
+using static Lucene.Net.Search.BooleanClause;
+//using Version = Lucene.Net.Util.Version;
 
 namespace Shravan.DJ.TagIndexer
 {
@@ -202,29 +204,29 @@ namespace Shravan.DJ.TagIndexer
 			// add new index entry
 			var doc = new Document();
 
-			doc.Add(new Field("Index", id3.Index, Field.Store.YES, Field.Index.NOT_ANALYZED, Field.TermVector.NO));
-			doc.Add(new Field("FullPath", id3.FullPath, Field.Store.YES, Field.Index.NO, Field.TermVector.NO));
-			doc.Add(new Field("DateModified", DateTools.DateToString(id3.DateModified, DateTools.Resolution.SECOND), Field.Store.YES, Field.Index.NO, Field.TermVector.NO));
+			doc.Add(new StringField("Index", id3.Index, Field.Store.YES));
+			doc.Add(new StringField("FullPath", id3.FullPath, Field.Store.YES));
+			doc.Add(new StringField("DateModified", DateTools.DateToString(id3.DateModified, DateTools.Resolution.SECOND), Field.Store.YES));
 			foreach (var kv in id3.Data)
 			{
 				if (kv.Key == "BPM")
 				{
 					int val = (int)kv.Value;
-					doc.Add(new NumericField(kv.Key, Field.Store.YES, true).SetIntValue(val));
+					doc.Add(new IntField(kv.Key, val, Field.Store.YES));
 				}
 				else if (kv.Key == "Commment")
 				{
 					string val = kv.Value as string;
 					string[] comments = val.Split(new[] { '\\', '/' });
 
-					doc.Add(new Field(kv.Key, val ?? "", Field.Store.YES, Field.Index.ANALYZED, Field.TermVector.NO));
-					doc.Add(new Field(kv.Key + "_Split", val ?? "", Field.Store.NO, Field.Index.ANALYZED, Field.TermVector.NO));
+					doc.Add(new TextField(kv.Key, val ?? "", Field.Store.YES));
+					doc.Add(new TextField(kv.Key + "_Split", val ?? "", Field.Store.NO));
 
 				}
 				else
 				{
 					var val = kv.Value as string;
-					doc.Add(new Field(kv.Key, val ?? "", Field.Store.YES, Field.Index.ANALYZED, Field.TermVector.NO));
+					doc.Add(new TextField(kv.Key, val ?? "", Field.Store.YES));
 				}
 			}
 
@@ -289,13 +291,13 @@ namespace Shravan.DJ.TagIndexer
 			var analyzer = new StandardAnalyzer(LUCENE_VER);
 
 
-			using (var searcher = new IndexSearcher(_directory, true))
+			var searcher = new IndexSearcher(DirectoryReader.Open(_directory));
 			{
-				searcher.SetDefaultFieldSortScoring(true, true);
+				//searcher.SetDefaultFieldSortScoring(true, true);
 				var hits = searcher.Search(query, hits_limit).ScoreDocs;
 				var results = MapLuceneToDataList(hits, searcher);
-				analyzer.Close();
-				searcher.Dispose();
+				//analyzer.Close();
+				//searcher.Dispose();
 				return results;
 			}
 		}
@@ -306,9 +308,8 @@ namespace Shravan.DJ.TagIndexer
 		{
 			var fullPath = doc.Get("FullPath");
 			IDictionary<string, object> dic = new ExpandoObject();
-			foreach (var field in doc.GetFields())
+			foreach (var field in doc)
 			{
-
 				dic.Add(field.Name, field.StringValue);
 			}
 
@@ -335,7 +336,7 @@ namespace Shravan.DJ.TagIndexer
 		{
 			// init lucene
 			var analyzer = new StandardAnalyzer(LUCENE_VER);
-			using (var writer = new IndexWriter(_directory, analyzer, true, IndexWriter.MaxFieldLength.UNLIMITED))
+			using (var writer = new IndexWriter(_directory, new IndexWriterConfig(LUCENE_VER, analyzer)))
 			{
 				// add data to lucene search index (replaces older entry if any)
 				foreach (var tag in tagList)
@@ -344,7 +345,7 @@ namespace Shravan.DJ.TagIndexer
 				}
 
 				// close handles
-				analyzer.Close();
+				//analyzer.Close();
 				writer.Dispose();
 			}
 		}
@@ -352,19 +353,23 @@ namespace Shravan.DJ.TagIndexer
 
 		internal static IEnumerable<Id3TagData> GetAllIndexRecords()
 		{
-			// validate search index
-			if (!System.IO.Directory.EnumerateFiles(_luceneDir).Any())
-				return new List<Id3TagData>();
+			throw new NotImplementedException();
 
-			// set up lucene searcher
-			var searcher = new IndexSearcher(_directory, false);
-			var reader = IndexReader.Open(_directory, false);
-			var docs = new List<Document>();
-			var term = reader.TermDocs();
-			while (term.Next()) docs.Add(searcher.Doc(term.Doc));
-			reader.Dispose();
-			searcher.Dispose();
-			return MapLuceneToDataList(docs);
+			// validate search index
+			//if (!System.IO.Directory.EnumerateFiles(_luceneDir).Any())
+			//	return new List<Id3TagData>();
+
+			//// set up lucene searcher
+
+			//var reader = DirectoryReader.Open(_directory);
+			//var searcher = new IndexSearcher(reader);
+			
+			//var docs = new List<Document>();
+			//var term = reader
+			//while (term.Next()) docs.Add(searcher.Doc(term.Doc));
+			////reader.Dispose();
+			////searcher.Dispose();
+			//return MapLuceneToDataList(docs);
 		}
 
 		#endregion

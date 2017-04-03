@@ -227,7 +227,9 @@ namespace Shravan.DJ.TrakSearch
 
 				AllTagData.IndexDirectory(folder);
 
-				SearchEngineService.AddUpdateLuceneIndex(AllTagData.tagList.AsEnumerable());
+				//SearchEngineService.AddOrUpdateLuceneIndex(AllTagData.tagList);
+				SearchEngineService.AddLuceneIndex(AllTagData.tagList);
+				
 
 				Folder2Button.Visibility = Visibility.Hidden;
 

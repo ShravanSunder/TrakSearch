@@ -194,7 +194,33 @@ namespace Shravan.DJ.TagIndexer
 		}
 
 
-		private static void AddToLuceneIndex(Id3TagData id3, IndexWriter writer)
+
+		public static void AddLuceneIndex(IEnumerable<Id3TagData> tagList)
+		{
+			// init lucene
+			var analyzer = new StandardAnalyzer(LUCENE_VER);
+			using (var writer = new IndexWriter(_directory, new IndexWriterConfig(LUCENE_VER, analyzer)))
+			{
+				List<Document> docs = new List<Document>();
+				// add data to lucene search index (replaces older entry if any)
+				foreach (var tag in tagList)
+				{
+					var doc = new Document();
+					PopulateLuceneDoc(tag, doc);
+					docs.Add(doc);
+
+					// add entry to index
+				}
+
+				writer.AddDocuments(docs);
+
+				// close handles
+				//analyzer.Close();
+				writer.Dispose();
+			}
+		}
+
+		private static void AddOrUpdateLuceneIndex(Id3TagData id3, IndexWriter writer)
 		{
 			// remove older index entry
 
@@ -203,7 +229,14 @@ namespace Shravan.DJ.TagIndexer
 
 			// add new index entry
 			var doc = new Document();
+			PopulateLuceneDoc(id3, doc);
 
+			// add entry to index
+			writer.AddDocument(doc);
+		}
+
+		private static void PopulateLuceneDoc(Id3TagData id3, Document doc)
+		{
 			doc.Add(new StringField("Index", id3.Index, Field.Store.YES));
 			doc.Add(new StringField("FullPath", id3.FullPath, Field.Store.YES));
 			doc.Add(new StringField("DateModified", DateTools.DateToString(id3.DateModified, DateTools.Resolution.SECOND), Field.Store.YES));
@@ -229,13 +262,26 @@ namespace Shravan.DJ.TagIndexer
 					doc.Add(new TextField(kv.Key, val ?? "", Field.Store.YES));
 				}
 			}
-
-			// add entry to index
-			writer.AddDocument(doc);
 		}
+		
 
+		public static void AddOrUpdateLuceneIndex(IEnumerable<Id3TagData> tagList)
+		{
+			// init lucene
+			var analyzer = new StandardAnalyzer(LUCENE_VER);
+			using (var writer = new IndexWriter(_directory, new IndexWriterConfig(LUCENE_VER, analyzer)))
+			{
+				// add data to lucene search index (replaces older entry if any)
+				foreach (var tag in tagList)
+				{
+					AddOrUpdateLuceneIndex(tag, writer);
+				}
 
-
+				// close handles
+				//analyzer.Close();
+				writer.Dispose();
+			}
+		}
 
 		private static NumericRangeQuery<int> CreateQueryInt(string searchField, int value, double range)
 		{
@@ -332,23 +378,6 @@ namespace Shravan.DJ.TagIndexer
 			return result;
 		}
 
-		public static void AddUpdateLuceneIndex(IEnumerable<Id3TagData> tagList)
-		{
-			// init lucene
-			var analyzer = new StandardAnalyzer(LUCENE_VER);
-			using (var writer = new IndexWriter(_directory, new IndexWriterConfig(LUCENE_VER, analyzer)))
-			{
-				// add data to lucene search index (replaces older entry if any)
-				foreach (var tag in tagList)
-				{
-					AddToLuceneIndex(tag, writer);
-				}
-
-				// close handles
-				//analyzer.Close();
-				writer.Dispose();
-			}
-		}
 
 
 		internal static IEnumerable<Id3TagData> GetAllIndexRecords()

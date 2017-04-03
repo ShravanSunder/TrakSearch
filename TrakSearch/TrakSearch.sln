@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TagIndexer", "TagIndexer\Ta
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TrakPlayer", "TrakPlayer\TrakPlayer.csproj", "{45BB0021-C871-40C6-88C6-8AE1171CC66A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestApp", "TestApp\TestApp.csproj", "{B030A54C-9863-4808-9858-D777C94BD912}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{45BB0021-C871-40C6-88C6-8AE1171CC66A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{45BB0021-C871-40C6-88C6-8AE1171CC66A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{45BB0021-C871-40C6-88C6-8AE1171CC66A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B030A54C-9863-4808-9858-D777C94BD912}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B030A54C-9863-4808-9858-D777C94BD912}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B030A54C-9863-4808-9858-D777C94BD912}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B030A54C-9863-4808-9858-D777C94BD912}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

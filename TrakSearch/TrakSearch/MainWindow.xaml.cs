@@ -9,6 +9,8 @@ using System.Windows.Controls;
 using System.Diagnostics;
 using System.Threading.Tasks;
 using System.Threading;
+using System.Text;
+using System.Text.RegularExpressions;
 
 namespace Shravan.DJ.TrakSearch
 {
@@ -23,7 +25,11 @@ namespace Shravan.DJ.TrakSearch
 		Stopwatch WindowTimer = new Stopwatch();
 		bool Searching = false;
 
+		public static RoutedCommand HotKeyCommands = new RoutedCommand();
+
 		Mutex SearchingMutex = new Mutex();
+
+		MusicPlayer 
 
 		public MainWindow()
 		{
@@ -40,6 +46,13 @@ namespace Shravan.DJ.TrakSearch
 				KeyTimer.Start();
 				WindowTimer.Start();
 
+
+				HotKeyCommands.InputGestures.Add(new KeyGesture(Key.F, ModifierKeys.Control));
+				//HotKeyCommands.InputGestures.Add(new KeyGesture(Key.D1, ModifierKeys.Alt));
+				//HotKeyCommands.InputGestures.Add(new KeyGesture(Key.D2, ModifierKeys.Alt));
+				//HotKeyCommands.InputGestures.Add(new KeyGesture(Key.D3, ModifierKeys.Alt));
+				//HotKeyCommands.InputGestures.Add(new KeyGesture(Key.D4, ModifierKeys.Alt));
+
 				StyleDataGrid();
 			}
 			catch (Exception ex)
@@ -53,36 +66,49 @@ namespace Shravan.DJ.TrakSearch
 		{
 			if (e.Key == Key.Enter)
 			{
-				SearchMusic(SearchBox.Text);
-				KeyTimer.Restart();
+				if (string.IsNullOrEmpty(SearchBox.Text.Trim())
+					&& string.IsNullOrEmpty(BpmSearchBox.Text.Trim())
+					&& string.IsNullOrEmpty(KeySearchBox.Text.Trim())
+					&& string.IsNullOrEmpty(EnergySearchBox.Text.Trim()))
+				{
+					SearchBox.Clear();
+					UpdateItemSource();
+				}
+				else
+				{
+					SearchMusic(SearchBox.Text, BpmSearchBox.Text, KeySearchBox.Text, EnergySearchBox.Text);
+					KeyTimer.Restart();
+				}
 			}
 			else if (e.Key == Key.Escape)
 			{
 				SearchBox.Clear();
 				UpdateItemSource();
 			}
-			else if (!(e.Key < Key.A) || (e.Key > Key.Z)
-				|| ((e.Key == Key.V || e.Key == Key.X) && (Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control)
-				|| (e.Key == Key.Back || e.Key == Key.Delete)
-				)
-			{
-				var s = SearchBox.Text;
+			//else if (!(e.Key < Key.A) || (e.Key > Key.Z)
+			//	|| ((e.Key == Key.V || e.Key == Key.X) && (Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control)
+			//	|| (e.Key == Key.Back || e.Key == Key.Delete)
+			//	)
+			//{
+			//	var s = SearchBox.Text;
 
-				if (string.IsNullOrEmpty(s))
-				{
-					SearchBox.Clear();
-					UpdateItemSource();
-				}
-				else if (KeyTimer.ElapsedMilliseconds > 250 && Searching == false)
-				{
-					KeyTimer.Restart();
-					SearchMusic(s);
-				}
-			}
+			//	if (string.IsNullOrEmpty(s))
+			//	{
+			//		SearchBox.Clear();
+			//		UpdateItemSource();
+			//	}
+			//	else if (KeyTimer.ElapsedMilliseconds > 500 && Searching == false)
+			//	{
+			//		KeyTimer.Restart();
+			//		SearchMusic(s);
+			//	}
+			//}
 		}
 
-		private void SearchMusic(string text)
+		private void SearchMusic(string searchText, string bpmText = null, string keyText = null, string energy = null)
 		{
+			var search = CreateSearchText(searchText, bpmText, keyText, energy);
+
 			var task = new Task(() =>
 			{
 				SearchingMutex.WaitOne();
@@ -92,7 +118,7 @@ namespace Shravan.DJ.TrakSearch
 
 				try
 				{
-					result = SearchEngineService.Search(text);
+					result = SearchEngineService.Search(search);
 				}
 				catch (Exception ex)
 				{
@@ -116,6 +142,27 @@ namespace Shravan.DJ.TrakSearch
 
 		}
 
+		private string CreateSearchText(string searchText, string bpmText, string keyText, string energyText)
+		{
+			var search = new StringBuilder();
+			search.Append(searchText + " ");
+
+			if (!string.IsNullOrEmpty(bpmText))
+			{
+				search.Append(" BPM:" + bpmText);
+			}
+			if (!string.IsNullOrEmpty(keyText))
+			{
+				search.Append(" Key:" + keyText);
+			}
+			if (!string.IsNullOrEmpty(energyText))
+			{
+				search.Append(" Energy:" + energyText + "starzz*");
+			}
+
+			return search.ToString();
+		}
+
 		private void UpdateItemSource(IEnumerable<Id3TagData> data = null)
 		{
 			data = data ?? AllTagData.tagList;
@@ -123,6 +170,7 @@ namespace Shravan.DJ.TrakSearch
 			this.Dispatcher.Invoke(() =>
 			{
 				MusicData.ItemsSource = data;
+				ResultCountLabel.Content = data.Count();
 				MusicData.Items.Refresh();
 			});
 		}
@@ -170,8 +218,12 @@ namespace Shravan.DJ.TrakSearch
 				SearchEngineService.AddUpdateLuceneIndex(AllTagData.tagList.AsEnumerable());
 
 				Folder2Button.Visibility = Visibility.Hidden;
+
 				this.MusicData.ItemsSource = AllTagData.tagList.Cast<Id3TagDataBase>();
 				this.MusicData.Items.Refresh();
+				this.ResultCountLabel.Content = AllTagData.tagList.Count();
+
+				UpdateItemSource();
 			}
 
 			FolderButton.Content = "Folder";
@@ -231,5 +283,31 @@ namespace Shravan.DJ.TrakSearch
 			}
 		}
 
+		private void MyCommandExecuted(object sender, ExecutedRoutedEventArgs e)
+		{
+			SearchBox.Focus();
+		}
+
+		private void NumberSearchBox_PreviewTextInput(object sender, TextCompositionEventArgs e)
+		{
+			e.Handled = !NumbersOnly(e.Text);
+		}
+
+		private void KeySearchBox_PreviewTextInput(object sender, TextCompositionEventArgs e)
+		{
+			e.Handled = !HarmonicKeyOnly(e.Text);
+		}
+
+		private static bool NumbersOnly(string text)
+		{
+			Regex regex = new Regex("[^0-9]+"); //regex that matches disallowed text
+			return !regex.IsMatch(text);
+		}
+
+		private static bool HarmonicKeyOnly(string text)
+		{
+			Regex regex = new Regex("[^0-9md]+"); //regex that matches disallowed text
+			return !regex.IsMatch(text);
+		}
 	}
 }

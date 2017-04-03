@@ -1,23 +1,36 @@
-﻿using CSCore;
+﻿using System;
+using System.ComponentModel;
+using CSCore;
 using CSCore.Codecs;
 using CSCore.CoreAudioAPI;
 using CSCore.SoundOut;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+
 
 namespace Shravan.DJ.TrakPlayer
 {
-
-	public class MusicPlayer : Component
+	public class MusicPlayer : IDisposable
 	{
 		private ISoundOut _soundOut;
 		private IWaveSource _waveSource;
 
 		public event EventHandler<PlaybackStoppedEventArgs> PlaybackStopped;
+
+		public static MMDevice GetDefaultRenderDevice()
+		{
+			using (var enumerator = new MMDeviceEnumerator())
+			{
+				return enumerator.GetDefaultAudioEndpoint(DataFlow.Render, Role.Console);
+			}
+		}
+
+		public static MMDevice GetPlaybackDevice()
+		{
+			using (var enumerator = new MMDeviceEnumerator())
+			{
+				var data = enumerator.EnumAudioEndpoints(DataFlow.Render, DeviceState.Active);
+				return data[5];
+			}
+		}
 
 		public PlaybackState PlaybackState
 		{
@@ -117,9 +130,9 @@ namespace Shravan.DJ.TrakPlayer
 			}
 		}
 
-		protected override void Dispose(bool disposing)
+
+		public void Dispose()
 		{
-			base.Dispose(disposing);
 			CleanupPlayback();
 		}
 	}

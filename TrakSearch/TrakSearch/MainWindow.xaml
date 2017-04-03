@@ -12,14 +12,34 @@
     <Window.Resources>
         <SolidColorBrush x:Key="LightBlack" Color="#282828" />
     </Window.Resources>
+    <Window.CommandBindings>
+        <CommandBinding Command="{x:Static local:MainWindow.HotKeyCommands}" Executed="MyCommandExecuted"/>
+    </Window.CommandBindings>
     <Grid>
         <DockPanel HorizontalAlignment="Stretch" Margin="1,1,1,1" VerticalAlignment="Stretch">
             <DockPanel DockPanel.Dock="Top">
-                <Button Name="FolderButton" DockPanel.Dock="Right" Click="FolderButton_Click" Padding="6,2,6,2">Folder</Button>
-                <Button Name="SearchButton" DockPanel.Dock="Right" Click="SearchButton_Click" Padding="6,2,6,2">Search</Button>
-                <Button Name="CancelButton" DockPanel.Dock="Right" Click="CancelButton_Click" Padding="3,2,3,2">X</Button>
-                <TextBox Name="SearchBox" KeyUp="SearchBox_KeyUp" FontSize="14" ></TextBox>
-                
+                 <StackPanel Orientation="Horizontal" DockPanel.Dock="Left">
+                    <Label>BPM</Label>
+                    <TextBox Name="BpmSearchBox" 
+                             KeyUp="SearchBox_KeyUp" PreviewTextInput="NumberSearchBox_PreviewTextInput" 
+                             FontSize="13" DockPanel.Dock="Left" Width="33" MaxLength="3" TabIndex="1"></TextBox>
+                    <Label>Key</Label>
+                    <TextBox Name="KeySearchBox" 
+                             KeyUp="SearchBox_KeyUp" PreviewTextInput="KeySearchBox_PreviewTextInput" 
+                             FontSize="13" DockPanel.Dock="Left" Width="33" MaxLength="3" TabIndex="2"></TextBox>
+                    <Label>Energy</Label>
+                    <TextBox Name="EnergySearchBox" 
+                             KeyUp="SearchBox_KeyUp" PreviewTextInput="NumberSearchBox_PreviewTextInput"  
+                             FontSize="13" DockPanel.Dock="Left" Width="33" MaxLength="1" TabIndex="3"></TextBox>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" DockPanel.Dock="Right">
+                    <Label Name="ResultCountLabel" Width="30" FontSize="10"></Label>
+                    <Button Name="CancelButton" DockPanel.Dock="Right" Click="CancelButton_Click" Padding="3,2,3,2">X</Button>
+                    <Button Name="SearchButton" DockPanel.Dock="Right" Click="SearchButton_Click" Padding="6,2,6,2" TabIndex="5">Search</Button>
+                    <Button Name="FolderButton" DockPanel.Dock="Right" Click="FolderButton_Click" Padding="6,2,6,2">Folder</Button>
+                </StackPanel>
+                <Label>Search</Label>
+                <TextBox Name="SearchBox" KeyUp="SearchBox_KeyUp" FontSize="14"  TabIndex="4" ></TextBox>
             </DockPanel>
             <Grid>
                 <DataGrid Name="MusicData" MouseDoubleClick="MusicData_MouseDoubleClick" 

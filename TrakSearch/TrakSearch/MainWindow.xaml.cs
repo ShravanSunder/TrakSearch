@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using System.Threading;
 using System.Text;
 using System.Text.RegularExpressions;
+using Shravan.DJ.TrakPlayer;
 
 namespace Shravan.DJ.TrakSearch
 {
@@ -25,11 +26,15 @@ namespace Shravan.DJ.TrakSearch
 		Stopwatch WindowTimer = new Stopwatch();
 		bool Searching = false;
 
-		public static RoutedCommand HotKeyCommands = new RoutedCommand();
+		public static RoutedCommand SearchHotkey = new RoutedCommand();
+		public static RoutedCommand PlayerPlayHotkey = new RoutedCommand();
+		public static RoutedCommand PlayerRewindHotkey = new RoutedCommand();
+		public static RoutedCommand PlayerForwardHotkey = new RoutedCommand();
+		public static RoutedCommand PlayerStopHotkey = new RoutedCommand();
 
 		Mutex SearchingMutex = new Mutex();
 
-		MusicPlayer 
+		MusicPlayer _Player;
 
 		public MainWindow()
 		{
@@ -47,13 +52,20 @@ namespace Shravan.DJ.TrakSearch
 				WindowTimer.Start();
 
 
-				HotKeyCommands.InputGestures.Add(new KeyGesture(Key.F, ModifierKeys.Control));
+				SearchHotkey.InputGestures.Add(new KeyGesture(Key.F, ModifierKeys.Control));
 				//HotKeyCommands.InputGestures.Add(new KeyGesture(Key.D1, ModifierKeys.Alt));
 				//HotKeyCommands.InputGestures.Add(new KeyGesture(Key.D2, ModifierKeys.Alt));
 				//HotKeyCommands.InputGestures.Add(new KeyGesture(Key.D3, ModifierKeys.Alt));
 				//HotKeyCommands.InputGestures.Add(new KeyGesture(Key.D4, ModifierKeys.Alt));
 
+				PlayerPlayHotkey.InputGestures.Add(new KeyGesture(Key.Up, ModifierKeys.Control));
+				PlayerRewindHotkey.InputGestures.Add(new KeyGesture(Key.Left, ModifierKeys.Control));
+				PlayerForwardHotkey.InputGestures.Add(new KeyGesture(Key.Right, ModifierKeys.Control));
+				PlayerStopHotkey.InputGestures.Add(new KeyGesture(Key.Down, ModifierKeys.Control));
+
 				StyleDataGrid();
+
+				_Player = new MusicPlayer();
 			}
 			catch (Exception ex)
 			{
@@ -283,9 +295,37 @@ namespace Shravan.DJ.TrakSearch
 			}
 		}
 
-		private void MyCommandExecuted(object sender, ExecutedRoutedEventArgs e)
+		private void SearchBox_HotKeyCommand(object sender, ExecutedRoutedEventArgs e)
 		{
 			SearchBox.Focus();
+		}
+
+		private void PlayerPlay_HotKeyCommand(object sender, ExecutedRoutedEventArgs e)
+		{
+			var data = (Id3TagData)MusicData.SelectedItem;
+			var device = MusicPlayer.GetDefaultRenderDevice();
+			if (data != null)
+			{
+				_Player.Open(data.FullPath, device);
+				_Player.Play();
+			}
+		}
+
+		private void PlayerRewind_HotKeyCommand(object sender, ExecutedRoutedEventArgs e)
+		{
+			_Player.Position = _Player.Position.Subtract(new TimeSpan(0, 0, 30));
+		}
+
+
+		private void PlayerForward_HotKeyCommand(object sender, ExecutedRoutedEventArgs e)
+		{
+			_Player.Position = _Player.Position.Add(new TimeSpan(0, 0, 30));
+		}
+
+		private void PlayerStop_HotKeyCommand(object sender, ExecutedRoutedEventArgs e)
+		{
+			_Player.Stop();
+
 		}
 
 		private void NumberSearchBox_PreviewTextInput(object sender, TextCompositionEventArgs e)
@@ -308,6 +348,47 @@ namespace Shravan.DJ.TrakSearch
 		{
 			Regex regex = new Regex("[^0-9md]+"); //regex that matches disallowed text
 			return !regex.IsMatch(text);
+		}
+
+
+		private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
+		{
+			foreach (InputBinding inputBinding in this.InputBindings)
+			{
+				KeyGesture keyGesture = inputBinding.Gesture as KeyGesture;
+				if (keyGesture != null && keyGesture.Key == e.Key && keyGesture.Modifiers == Keyboard.Modifiers)
+				{
+					if (inputBinding.Command != null)
+					{
+						inputBinding.Command.Execute(0);
+						e.Handled = true;
+					}
+				}
+			}
+
+			foreach (CommandBinding cb in this.CommandBindings)
+			{
+				RoutedCommand command = cb.Command as RoutedCommand;
+				if (command != null)
+				{
+					foreach (InputGesture inputGesture in command.InputGestures)
+					{
+						KeyGesture keyGesture = inputGesture as KeyGesture;
+						if (keyGesture != null && keyGesture.Key == e.Key && keyGesture.Modifiers == Keyboard.Modifiers)
+						{
+							command.Execute(0, this);
+							e.Handled = true;
+						}
+					}
+				}
+			}
+		}
+
+		private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+		{
+			_Player.Stop();
+			_Player.Dispose();
+			_Player = null;
 		}
 	}
 }

@@ -30,7 +30,7 @@ namespace TestApp
 			var d = MusicPlayer.GetDefaultRenderDevice();
 			m.Open(@"F:\Shravan's Documents\Dropbox\!Backup\MkLinks\Mp3\Dance\Salsa\Huey Dunbar\Huey Dunbar - IV (2010)\02 - Te Amare.mp3", d);
 			m.Play();
-			
+
 
 			m.Position = m.Position.Add(new TimeSpan(0, 0, 20));
 

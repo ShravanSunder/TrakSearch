@@ -8,12 +8,18 @@
         Title="DJ Trak Search" Height="600" Width="800"
         Style="{StaticResource {x:Type Window}}"
         Icon="./Resources/icon.png"
-        SizeChanged="Window_SizeChanged">
+        SizeChanged="Window_SizeChanged"
+        PreviewKeyDown="Window_PreviewKeyDown"
+        Closing="Window_Closing">
     <Window.Resources>
         <SolidColorBrush x:Key="LightBlack" Color="#282828" />
     </Window.Resources>
     <Window.CommandBindings>
-        <CommandBinding Command="{x:Static local:MainWindow.HotKeyCommands}" Executed="MyCommandExecuted"/>
+        <CommandBinding Command="{x:Static local:MainWindow.SearchHotkey}" Executed="SearchBox_HotKeyCommand"/>
+        <CommandBinding Command="{x:Static local:MainWindow.PlayerPlayHotkey}" Executed="PlayerPlay_HotKeyCommand"/>
+        <CommandBinding Command="{x:Static local:MainWindow.PlayerRewindHotkey}" Executed="PlayerRewind_HotKeyCommand"/>
+        <CommandBinding Command="{x:Static local:MainWindow.PlayerForwardHotkey}" Executed="PlayerForward_HotKeyCommand"/>
+        <CommandBinding Command="{x:Static local:MainWindow.PlayerStopHotkey}" Executed="PlayerStop_HotKeyCommand"/>
     </Window.CommandBindings>
     <Grid>
         <DockPanel HorizontalAlignment="Stretch" Margin="1,1,1,1" VerticalAlignment="Stretch">

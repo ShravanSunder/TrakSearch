@@ -53,7 +53,18 @@ namespace Shravan.DJ.TrakPlayer
 			set
 			{
 				if (_waveSource != null)
-					_waveSource.SetPosition(value);
+				{
+					if (value > TimeSpan.Zero)
+					{
+
+						_waveSource.SetPosition(value);
+					}
+					else
+					{
+						_waveSource.SetPosition(TimeSpan.Zero);
+					}
+				}
+
 			}
 		}
 
@@ -95,7 +106,8 @@ namespace Shravan.DJ.TrakPlayer
 					  .ToWaveSource();
 			_soundOut = new WasapiOut() { Latency = 100, Device = device };
 			_soundOut.Initialize(_waveSource);
-			if (PlaybackStopped != null) _soundOut.Stopped += PlaybackStopped;
+			if (PlaybackStopped != null)
+				_soundOut.Stopped += PlaybackStopped;
 		}
 
 		public void Play()

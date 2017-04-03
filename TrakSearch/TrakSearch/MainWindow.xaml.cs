@@ -10,7 +10,7 @@ using System.Diagnostics;
 using System.Threading.Tasks;
 using System.Threading;
 
-namespace DJ.TrakSearch
+namespace Shravan.DJ.TrakSearch
 {
 	/// <summary>
 	/// Interaction logic for MainWindow.xaml

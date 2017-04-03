@@ -367,6 +367,7 @@ namespace Shravan.DJ.TagIndexer
 
 			return hits.Select(h => MapLuceneDocumentToData(h)).ToList();
 		}
+
 		private static IEnumerable<Id3TagData> MapLuceneToDataList(IEnumerable<ScoreDoc> hits,
 			 IndexSearcher searcher)
 		{

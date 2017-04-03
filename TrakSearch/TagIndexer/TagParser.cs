@@ -43,11 +43,23 @@ namespace Shravan.DJ.TagIndexer
 
 			var tasks = new List<Task>();
 
-			foreach (var file in files)
+			const int BATCH_SIZE = 10;
+			int batchCount = 0;
+			while (batchCount < files.Count())
 			{
-				var t = new Task(() => IndexFiles(file));
-				t.Start();
+				var batch = files.Take(BATCH_SIZE);
+				batchCount += BATCH_SIZE;
+				
+				var t = new Task(() => 
+				{ 
+					foreach (var file in batch)
+					{
+						IndexFiles(file);
+					}
+				});
+
 				tasks.Add(t);
+				t.Start();
 			}
 
 			Task.WaitAll(tasks.ToArray());
@@ -55,7 +67,6 @@ namespace Shravan.DJ.TagIndexer
 
 		public void IndexFiles(FileInfo fileInfo)
 		{
-			//if (fileInfo.LastWriteTime > DateTime)
 			{
 				try
 				{

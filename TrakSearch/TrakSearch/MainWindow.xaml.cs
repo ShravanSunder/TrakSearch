@@ -83,8 +83,7 @@ namespace Shravan.DJ.TrakSearch
 					&& string.IsNullOrEmpty(KeySearchBox.Text.Trim())
 					&& string.IsNullOrEmpty(EnergySearchBox.Text.Trim()))
 				{
-					SearchBox.Clear();
-					UpdateItemSource();
+					ClearSearch();
 				}
 				else
 				{
@@ -94,27 +93,18 @@ namespace Shravan.DJ.TrakSearch
 			}
 			else if (e.Key == Key.Escape)
 			{
-				SearchBox.Clear();
-				UpdateItemSource();
+				ClearSearch();
 			}
-			//else if (!(e.Key < Key.A) || (e.Key > Key.Z)
-			//	|| ((e.Key == Key.V || e.Key == Key.X) && (Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control)
-			//	|| (e.Key == Key.Back || e.Key == Key.Delete)
-			//	)
-			//{
-			//	var s = SearchBox.Text;
+		}
 
-			//	if (string.IsNullOrEmpty(s))
-			//	{
-			//		SearchBox.Clear();
-			//		UpdateItemSource();
-			//	}
-			//	else if (KeyTimer.ElapsedMilliseconds > 500 && Searching == false)
-			//	{
-			//		KeyTimer.Restart();
-			//		SearchMusic(s);
-			//	}
-			//}
+		private void ClearSearch()
+		{
+			SearchBox.Clear();
+			EnergySearchBox.Clear();
+			KeySearchBox.Clear();
+			BpmSearchBox.Clear();
+
+			UpdateItemSource();
 		}
 
 		private void SearchMusic(string searchText, string bpmText = null, string keyText = null, string energy = null)
@@ -194,8 +184,7 @@ namespace Shravan.DJ.TrakSearch
 
 		private void CancelButton_Click(object sender, RoutedEventArgs e)
 		{
-			SearchBox.Clear();
-			UpdateItemSource();
+			ClearSearch();
 		}
 
 		private void MusicData_MouseDoubleClick(object sender, MouseButtonEventArgs e)
@@ -217,6 +206,9 @@ namespace Shravan.DJ.TrakSearch
 
 			if (done == true)
 			{
+				var timer = new Stopwatch();
+				timer.Start();
+
 				AllTagData.tagList = new System.Collections.Concurrent.ConcurrentBag<Id3TagData>();
 				this.MusicData.ItemsSource = new List<Id3TagData>();
 				this.MusicData.Items.Refresh();
@@ -226,7 +218,7 @@ namespace Shravan.DJ.TrakSearch
 				SearchEngineService.ClearLuceneIndex();
 
 				AllTagData.IndexDirectory(folder);
-
+				
 				//SearchEngineService.AddOrUpdateLuceneIndex(AllTagData.tagList);
 				SearchEngineService.AddLuceneIndex(AllTagData.tagList);
 				
@@ -238,6 +230,9 @@ namespace Shravan.DJ.TrakSearch
 				this.ResultCountLabel.Content = AllTagData.tagList.Count();
 
 				UpdateItemSource();
+
+				timer.Stop();
+				var time = timer.ElapsedMilliseconds;
 			}
 
 			FolderButton.Content = "Folder";

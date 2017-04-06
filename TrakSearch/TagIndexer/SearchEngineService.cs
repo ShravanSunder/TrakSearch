@@ -51,11 +51,8 @@ namespace Shravan.DJ.TagIndexer
 				CreateQueryWithWildCard(restrictedKeys, searchTerm, query);
 			CreateKeyQueries(specialTerms, query);
 			CreateBpmQueries(specialTerms, query);
-
-
-
+			
 			return SearchInternal(query);
-
 		}
 
 		private static void CreateQueryWithWildCard(List<string> restrictedKeys, string searchTerms, BooleanQuery query)
@@ -312,9 +309,8 @@ namespace Shravan.DJ.TagIndexer
 			// search by single field
 			if (!string.IsNullOrEmpty(searchField))
 			{
-				var parser = new QueryParser(LUCENE_VER, searchField, analyzer);
-				var query = ParseQuery(searchQuery, parser);
-
+				
+				var query = new TermQuery(new Term(searchField, searchQuery));
 				return query;
 			}
 			else
@@ -330,6 +326,21 @@ namespace Shravan.DJ.TagIndexer
 
 		}
 
+		public static Id3TagData SearchWithIndex(string Index)
+		{
+			
+			var analyzer = new StandardAnalyzer(LUCENE_VER);
+
+			var query = CreateQuery("\"" + Index + "\"", "Index");
+
+			var searcher = new IndexSearcher(DirectoryReader.Open(_directory));
+			{
+				var hits = searcher.Search(query, 1).ScoreDocs;
+				var results = MapLuceneToDataList(hits, searcher);
+
+				return results.SingleOrDefault();
+			}
+		}
 
 		private static IEnumerable<Id3TagData> SearchInternal(Query query)
 		{

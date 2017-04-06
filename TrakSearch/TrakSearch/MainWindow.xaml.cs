@@ -215,7 +215,7 @@ namespace Shravan.DJ.TrakSearch
 
 				var folder = dialog.FileName;
 
-				SearchEngineService.ClearLuceneIndex();
+				//SearchEngineService.ClearLuceneIndex();
 
 				AllTagData.IndexDirectory(folder);
 				

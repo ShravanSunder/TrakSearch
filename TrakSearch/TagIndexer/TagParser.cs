@@ -47,22 +47,24 @@ namespace Shravan.DJ.TagIndexer
 			int batchCount = 0;
 			while (batchCount < files.Count())
 			{
-				var batch = files.Take(BATCH_SIZE);
-				batchCount += BATCH_SIZE;
-				
-				var t = new Task(() => 
-				{ 
-					foreach (var file in batch)
-					{
-						IndexFiles(file);
-					}
-				});
-
+				var start = batchCount;
+				var t = new Task(() => StartTask(start, files, BATCH_SIZE));
 				tasks.Add(t);
 				t.Start();
+				batchCount += BATCH_SIZE;
 			}
 
 			Task.WaitAll(tasks.ToArray());
+		}
+
+		private void StartTask(int start, List<dynamic> files, int BATCH_SIZE)
+		{
+			var batch = files.Skip(start).Take(BATCH_SIZE);
+
+			foreach (var file in batch)
+			{
+				IndexFiles(file);
+			}
 		}
 
 		public void IndexFiles(FileInfo fileInfo)
@@ -71,10 +73,19 @@ namespace Shravan.DJ.TagIndexer
 				try
 				{
 					var file = new TagLib.Mpeg.File(fileInfo.FullName, ReadStyle.None);
-					var data = new Id3TagData(fileInfo, new Tag(file, 0)); ;
 
-					if (!string.IsNullOrEmpty(data.Title) && !string.IsNullOrEmpty(data.Artist))
-						tagList.Add(data);
+					var tagDataFromIndex = SearchEngineService.SearchWithIndex(fileInfo.FullName);
+
+					if (tagDataFromIndex == null || string.IsNullOrEmpty(tagDataFromIndex.Index) || tagDataFromIndex.DateModified < fileInfo.LastAccessTimeUtc)
+					{
+						var tagDataFromFile = new Id3TagData(fileInfo, new Tag(file, 0)); ;
+
+						if (!string.IsNullOrEmpty(tagDataFromFile.Title) && !string.IsNullOrEmpty(tagDataFromFile.Artist))
+							tagList.Add(tagDataFromFile);
+					}
+					else
+					{
+					}
 				}
 				catch (Exception e)
 				{

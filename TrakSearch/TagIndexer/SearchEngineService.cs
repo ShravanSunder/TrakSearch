@@ -70,15 +70,20 @@ namespace Shravan.DJ.TagIndexer
 			}
 
 			var query = new BooleanQuery();
+			if (!string.IsNullOrEmpty(CurrentPartition.Trim()))
+			{
+				query.Add(new WildcardQuery(new Term("Index", CurrentPartition + "*")), Occur.MUST);
+			}
+
 			if (!string.IsNullOrEmpty(searchTerm.Trim()))
+			{
 				CreateQueryWithWildCard(LuceneSpecialCharacters, searchTerm, query);
-			//if (!string.IsNullOrEmpty(CurrentPartition.Trim()))
-			//	query.Add(CreateQuery("Index:" + CurrentPartition + "*"), Occur.MUST);
+			}
+						
 			CreateKeyQueries(specialTerms, query);
 			CreateBpmQueries(specialTerms, query);
 
 			
-
 			return SearchInternal(query);
 		}
 

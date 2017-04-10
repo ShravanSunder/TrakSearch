@@ -24,6 +24,21 @@ namespace Shravan.DJ.TagIndexer
 		//+- && || !( ) {
 		//} [ ] ^ " ~ * ? : \
 
+		private static IndexSearcher _IndexSearcher = null;
+
+		protected static IndexSearcher Searcher
+		{
+			get
+			{
+				if (_IndexSearcher == null)
+				{
+					_IndexSearcher = new IndexSearcher(DirectoryReader.Open(_directory));
+				}
+
+				return _IndexSearcher;
+			}
+		}
+
 		static SearchEngineService()
 		{
 			
@@ -344,17 +359,14 @@ namespace Shravan.DJ.TagIndexer
 		public static IEnumerable<Id3TagData> SearchWithIndex(string Index)
 		{
 			var analyzer = new StandardAnalyzer(LUCENE_VER);
-
-
+			
 			var query = new TermQuery(new Term("Index", Index));
 			
-			var searcher = new IndexSearcher(DirectoryReader.Open(_directory));
-			{
-				var hits = searcher.Search(query, 10).ScoreDocs;
-				var results = MapLuceneToDataList(hits, searcher);
+			var hits = Searcher.Search(query, 10).ScoreDocs;
+			var results = MapLuceneToDataList(hits, Searcher);
 
-				return results;
-			}
+			return results;
+			
 		}
 
 		private static IEnumerable<Id3TagData> SearchInternal(Query query)
@@ -362,16 +374,14 @@ namespace Shravan.DJ.TagIndexer
 			var hits_limit = 500;
 			var analyzer = new StandardAnalyzer(LUCENE_VER);
 
-
-			var searcher = new IndexSearcher(DirectoryReader.Open(_directory));
-			{
-				//searcher.SetDefaultFieldSortScoring(true, true);
-				var hits = searcher.Search(query, hits_limit).ScoreDocs;
-				var results = MapLuceneToDataList(hits, searcher);
-				//analyzer.Close();
-				//searcher.Dispose();
-				return results;
-			}
+			
+			//searcher.SetDefaultFieldSortScoring(true, true);
+			var hits = Searcher.Search(query, hits_limit).ScoreDocs;
+			var results = MapLuceneToDataList(hits, Searcher);
+			//analyzer.Close();
+			//searcher.Dispose();
+			return results;
+			
 		}
 		#region LuceneMapping
 

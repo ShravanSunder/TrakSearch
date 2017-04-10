@@ -127,7 +127,7 @@ namespace Shravan.DJ.TrakSearch
 					Console.WriteLine(ex.ToString());
 				}
 
-				if (!AllTagData.tagList.IsEmpty)
+				if (!AllTagData.TagList.IsEmpty)
 				{
 					this.Dispatcher.Invoke(() =>
 					{
@@ -167,7 +167,7 @@ namespace Shravan.DJ.TrakSearch
 
 		private void UpdateItemSource(IEnumerable<Id3TagData> data = null)
 		{
-			data = data ?? AllTagData.tagList;
+			data = data ?? AllTagData.TagList;
 
 			this.Dispatcher.Invoke(() =>
 			{
@@ -209,7 +209,7 @@ namespace Shravan.DJ.TrakSearch
 				var timer = new Stopwatch();
 				timer.Start();
 
-				AllTagData.tagList = new System.Collections.Concurrent.ConcurrentBag<Id3TagData>();
+				AllTagData.TagList = new System.Collections.Concurrent.ConcurrentBag<Id3TagData>();
 				this.MusicData.ItemsSource = new List<Id3TagData>();
 				this.MusicData.Items.Refresh();
 
@@ -220,14 +220,14 @@ namespace Shravan.DJ.TrakSearch
 				AllTagData.IndexDirectory(folder);
 				
 				//SearchEngineService.AddOrUpdateLuceneIndex(AllTagData.tagList);
-				SearchEngineService.AddLuceneIndex(AllTagData.tagList);
+				//SearchEngineService.AddLuceneIndex(AllTagData.tagList);
 				
 
 				Folder2Button.Visibility = Visibility.Hidden;
 
-				this.MusicData.ItemsSource = AllTagData.tagList.Cast<Id3TagDataBase>();
+				this.MusicData.ItemsSource = AllTagData.TagList.Cast<Id3TagDataBase>();
 				this.MusicData.Items.Refresh();
-				this.ResultCountLabel.Content = AllTagData.tagList.Count();
+				this.ResultCountLabel.Content = AllTagData.TagList.Count();
 
 				UpdateItemSource();
 

@@ -18,12 +18,12 @@ namespace Shravan.DJ.TagIndexer
 {
 	public class TagParser
 	{
-		public ConcurrentBag<Id3TagData> tagList;
+		public ConcurrentBag<Id3TagData> TagList;
 		
 		
 		public TagParser()
 		{	
-			tagList = new ConcurrentBag<Id3TagData>();
+			TagList = new ConcurrentBag<Id3TagData>();
 		}
 		
 		public void IndexDirectory (string path)
@@ -41,11 +41,11 @@ namespace Shravan.DJ.TagIndexer
 			foreach (var file in directory.GetFiles("*.mp4", SearchOption.AllDirectories))
 				files.Add(file);
 
-			var indexes =  SearchEngineService.GetIndexCount();
+			//var indexes =  SearchEngineService.GetIndexCount();
 
 			var tasks = new List<Task>();
 
-			const int BATCH_SIZE = 10;
+			const int BATCH_SIZE = 300;
 			int batchCount = 0;
 			while (batchCount < files.Count())
 			{
@@ -62,14 +62,18 @@ namespace Shravan.DJ.TagIndexer
 		private void StartTask(int start, List<dynamic> files, int BATCH_SIZE)
 		{
 			var batch = files.Skip(start).Take(BATCH_SIZE);
+			var updateIndex = new List<Id3TagData>();
 
 			foreach (var file in batch)
 			{
-				IndexFiles(file);
+				IndexFiles(file, updateIndex);
 			}
+
+			if (updateIndex.Any())
+				SearchEngineService.AddLuceneIndex(updateIndex);
 		}
 
-		public void IndexFiles(FileInfo fileInfo)
+		public void IndexFiles(FileInfo fileInfo, List<Id3TagData> updateIndex)
 		{
 			{
 				try
@@ -91,7 +95,13 @@ namespace Shravan.DJ.TagIndexer
 						var tagDataFromFile = new Id3TagData(fileInfo, new Tag(file, 0)); ;
 
 						if (!string.IsNullOrEmpty(tagDataFromFile.Title) && !string.IsNullOrEmpty(tagDataFromFile.Artist))
-							tagList.Add(tagDataFromFile);
+						{
+							TagList.Add(tagDataFromFile);
+							updateIndex.Add(tagDataFromFile);
+						}
+						
+						
+						
 					}
 					else if (tagDataFromIndex.Count() == 1)
 					{
@@ -100,13 +110,15 @@ namespace Shravan.DJ.TagIndexer
 							var tagDataFromFile = new Id3TagData(fileInfo, new Tag(file, 0)); ;
 
 							if (!string.IsNullOrEmpty(tagDataFromFile.Title) && !string.IsNullOrEmpty(tagDataFromFile.Artist))
-								tagList.Add(tagDataFromFile);
+							{
+								TagList.Add(tagDataFromFile);
+								updateIndex.Add(tagDataFromFile);
+							}
 						}
 						else
 						{
 							var tag = tagDataFromIndex.First();
-
-							tagList.Add(tag);
+							TagList.Add(tag);
 						}
 					}
 					else

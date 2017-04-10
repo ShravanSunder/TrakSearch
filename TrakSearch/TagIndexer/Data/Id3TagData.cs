@@ -43,7 +43,7 @@ namespace Shravan.DJ.TagIndexer.Data
 		{
 			FullPath = file.FullName;
 			DateModified = file.LastAccessTimeUtc;
-			Index = file.FullName;
+			Index = CreateIndex(file.FullName);
 
 			PopulateFields(metaData, null);
 		}
@@ -67,11 +67,11 @@ namespace Shravan.DJ.TagIndexer.Data
 
 					if (((IDictionary<string, object>)data).Keys.Contains("Index"))
 					{
-						Index = data.Index;
+						Index = CreateIndex(data.Index);
 					}
 					else
 					{
-						Index = FullPath;
+						Index = CreateIndex(FullPath);
 					}
 
 					if (((IDictionary<string, object>)data).Keys.Contains("DateModified"))
@@ -108,13 +108,7 @@ namespace Shravan.DJ.TagIndexer.Data
 				_innerData = (IDictionary<string, object>)new ExpandoObject();
 			}
 		}
-
-		//public static string HashIndex(string fullPath)
-		//{
-		//	var md5 = MD5.Create();
-		//	var hash = md5.ComputeHash(new UTF8Encoding().GetBytes(fullPath));
-		//	return BitConverter.ToString(hash).Replace("-", "");
-		//}
+		
 
 		public bool IndexEqualsPath(string fullPath)
 		{
@@ -123,10 +117,10 @@ namespace Shravan.DJ.TagIndexer.Data
 			return input.Equals(Index);
 		}
 
-		//public bool IndexEqualsHash(string hash)
-		//{
-		//	return hash.Equals(Index);
-		//}
-
+		public static string CreateIndex (string fullPath)
+		{
+			return System.Text.RegularExpressions.Regex.Replace(fullPath, "[^0-9a-zA-Z]+", "_");
+		}
+		
 	}
 }

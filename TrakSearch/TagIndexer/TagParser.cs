@@ -41,6 +41,8 @@ namespace Shravan.DJ.TagIndexer
 			foreach (var file in directory.GetFiles("*.mp4", SearchOption.AllDirectories))
 				files.Add(file);
 
+			var indexes =  SearchEngineService.GetIndexCount();
+
 			var tasks = new List<Task>();
 
 			const int BATCH_SIZE = 10;
@@ -74,17 +76,42 @@ namespace Shravan.DJ.TagIndexer
 				{
 					var file = new TagLib.Mpeg.File(fileInfo.FullName, ReadStyle.None);
 
-					var tagDataFromIndex = SearchEngineService.SearchWithIndex(fileInfo.FullName);
+					var tagDataFromIndex = SearchEngineService.SearchWithIndex(Id3TagData.CreateIndex(fileInfo.FullName)).ToList();
 
-					if (tagDataFromIndex == null || string.IsNullOrEmpty(tagDataFromIndex.Index) || tagDataFromIndex.DateModified < fileInfo.LastAccessTimeUtc)
+					if (tagDataFromIndex == null || !tagDataFromIndex.Any() || tagDataFromIndex.Count() > 1)
 					{
+						if (tagDataFromIndex != null && tagDataFromIndex.Count() > 1)
+						{
+							foreach (var tag in tagDataFromIndex)
+							{
+								SearchEngineBase.ClearLuceneIndexRecord(tag);
+							}
+						}
+
 						var tagDataFromFile = new Id3TagData(fileInfo, new Tag(file, 0)); ;
 
 						if (!string.IsNullOrEmpty(tagDataFromFile.Title) && !string.IsNullOrEmpty(tagDataFromFile.Artist))
 							tagList.Add(tagDataFromFile);
 					}
+					else if (tagDataFromIndex.Count() == 1)
+					{
+						if (RoundUp(tagDataFromIndex.First().DateModified) < RoundUp(fileInfo.LastAccessTimeUtc))
+						{
+							var tagDataFromFile = new Id3TagData(fileInfo, new Tag(file, 0)); ;
+
+							if (!string.IsNullOrEmpty(tagDataFromFile.Title) && !string.IsNullOrEmpty(tagDataFromFile.Artist))
+								tagList.Add(tagDataFromFile);
+						}
+						else
+						{
+							var tag = tagDataFromIndex.First();
+
+							tagList.Add(tag);
+						}
+					}
 					else
 					{
+						//something went wrong?
 					}
 				}
 				catch (Exception e)
@@ -92,6 +119,17 @@ namespace Shravan.DJ.TagIndexer
 					Console.WriteLine(e);
 				}
 			}
+		}
+
+		public DateTime RoundUp(DateTime dt, TimeSpan? span = null)
+		{
+			if (!span.HasValue)
+			{
+				span =  TimeSpan.FromMilliseconds(1000);
+			}
+
+			long ticks = dt.Ticks / span.Value.Ticks;
+			return new DateTime(ticks);
 		}
 	}
 }

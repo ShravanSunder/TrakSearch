@@ -19,8 +19,9 @@ namespace Shravan.DJ.TagIndexer
 	public class TagParser
 	{
 		public ConcurrentBag<Id3TagData> TagList;
-		
-		
+		protected ConcurrentBag<Id3TagData> LuceneUpdates;
+
+
 		public TagParser()
 		{	
 			TagList = new ConcurrentBag<Id3TagData>();
@@ -35,31 +36,48 @@ namespace Shravan.DJ.TagIndexer
 
 		public void IndexDirectory(DirectoryInfo directory)
 		{
-			var files = new List<dynamic>();
-						
-			foreach (var file in directory.GetFiles("*.mp3", SearchOption.AllDirectories))
-				files.Add(file);
-
-			foreach (var file in directory.GetFiles("*.mp4", SearchOption.AllDirectories))
-				files.Add(file);
-
-			SearchEngineService.InitDirectoryifRequried();
-
-
-			var tasks = new List<Task>();
-
-			const int BATCH_SIZE = 300;
-			int batchCount = 0;
-			while (batchCount < files.Count())
+			try
 			{
-				var start = batchCount;
-				var t = new Task(() => StartTask(start, files, BATCH_SIZE));
-				tasks.Add(t);
-				t.Start();
-				batchCount += BATCH_SIZE;
-			}
+				ClearCurrentData();
 
-			Task.WaitAll(tasks.ToArray());
+				var files = new List<dynamic>();
+
+				foreach (var file in directory.GetFiles("*.mp3", SearchOption.AllDirectories))
+					files.Add(file);
+
+				foreach (var file in directory.GetFiles("*.mp4", SearchOption.AllDirectories))
+					files.Add(file);
+
+				SearchEngineService.InitDirectoryifRequried();
+
+
+				var tasks = new List<Task>();
+
+				const int BATCH_SIZE = 1;
+				int batchCount = 0;
+				while (batchCount < files.Count())
+				{
+					var start = batchCount;
+					var t = new Task(() => StartTask(start, files, BATCH_SIZE));
+					tasks.Add(t);
+					t.Start();
+					batchCount += BATCH_SIZE;
+				}
+
+				Task.WaitAll(tasks.ToArray());
+
+				SearchEngineService.AddOrUpdateLuceneIndex(LuceneUpdates);
+			}
+			catch (Exception ex)
+			{
+				Console.WriteLine(ex);
+			}
+		}
+
+		private void ClearCurrentData()
+		{
+			LuceneUpdates = new ConcurrentBag<Id3TagData>();
+			TagList = new ConcurrentBag<Id3TagData>();
 		}
 
 		private void StartTask(int start, List<dynamic> files, int BATCH_SIZE)
@@ -72,8 +90,8 @@ namespace Shravan.DJ.TagIndexer
 				IndexFiles(file, updateIndex);
 			}
 
-			if (updateIndex.Any())
-				SearchEngineService.AddLuceneIndex(updateIndex);
+			foreach (var t in updateIndex)
+				LuceneUpdates.Add(t);
 		}
 
 		public void IndexFiles(FileInfo fileInfo, List<Id3TagData> updateIndex)

@@ -29,6 +29,8 @@ namespace Shravan.DJ.TagIndexer
 		public void IndexDirectory (string path)
 		{
 			IndexDirectory(new DirectoryInfo(path));
+
+			SearchEngineService.CurrentPartition = Id3TagData.CreateIndex(path);
 		}
 
 		public void IndexDirectory(DirectoryInfo directory)
@@ -41,7 +43,8 @@ namespace Shravan.DJ.TagIndexer
 			foreach (var file in directory.GetFiles("*.mp4", SearchOption.AllDirectories))
 				files.Add(file);
 
-			//var indexes =  SearchEngineService.GetIndexCount();
+			SearchEngineService.InitDirectoryifRequried();
+
 
 			var tasks = new List<Task>();
 

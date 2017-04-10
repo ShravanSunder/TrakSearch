@@ -214,15 +214,9 @@ namespace Shravan.DJ.TrakSearch
 				this.MusicData.Items.Refresh();
 
 				var folder = dialog.FileName;
-
-				//SearchEngineService.ClearLuceneIndex();
-
+				
 				AllTagData.IndexDirectory(folder);
 				
-				//SearchEngineService.AddOrUpdateLuceneIndex(AllTagData.tagList);
-				//SearchEngineService.AddLuceneIndex(AllTagData.tagList);
-				
-
 				Folder2Button.Visibility = Visibility.Hidden;
 
 				this.MusicData.ItemsSource = AllTagData.TagList.Cast<Id3TagDataBase>();

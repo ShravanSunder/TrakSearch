@@ -43,7 +43,7 @@ namespace Shravan.DJ.TagIndexer.Data
 		{
 			FullPath = file.FullName;
 			DateModified = file.LastAccessTimeUtc;
-			Index = HashIndex(file.FullName);
+			Index = CreateIndex(file.FullName);
 
 			PopulateFields(metaData, null);
 		}
@@ -60,7 +60,6 @@ namespace Shravan.DJ.TagIndexer.Data
 
 		private void PopulateFields(TagLib.Id3v2.Tag metaData, dynamic data)
 		{
-
 			try
 			{
 				if (data != null)
@@ -68,11 +67,11 @@ namespace Shravan.DJ.TagIndexer.Data
 
 					if (((IDictionary<string, object>)data).Keys.Contains("Index"))
 					{
-						Index = data.Index;
+						Index = CreateIndex(data.Index);
 					}
 					else
 					{
-						Index = HashIndex(FullPath);
+						Index = CreateIndex(FullPath);
 					}
 
 					if (((IDictionary<string, object>)data).Keys.Contains("DateModified"))
@@ -88,7 +87,6 @@ namespace Shravan.DJ.TagIndexer.Data
 					data.Energy = metaData.Album?.Contains("starzz") ?? false ? metaData.Album : "";
 					data.BPM = metaData.BeatsPerMinute;
 					data.Comment = metaData.Comment;
-					//data.Pictures = metaData.Pictures;
 					data.Artist = metaData.Performers.FirstOrDefault();
 					data.Key = metaData.FirstOrDefault(f => f.FrameId == ByteVector.FromString("TKEY", StringType.UTF8)).ToString();
 				}
@@ -110,25 +108,19 @@ namespace Shravan.DJ.TagIndexer.Data
 				_innerData = (IDictionary<string, object>)new ExpandoObject();
 			}
 		}
-
-		public static string HashIndex(string fullPath)
-		{
-			var md5 = MD5.Create();
-			var hash = md5.ComputeHash(new UTF8Encoding().GetBytes(fullPath));
-			return BitConverter.ToString(hash).Replace("-", "");
-		}
+		
 
 		public bool IndexEqualsPath(string fullPath)
 		{
-			var input = HashIndex(fullPath);
+			var input = fullPath;
 
 			return input.Equals(Index);
 		}
 
-		public bool IndexEqualsHash(string hash)
+		public static string CreateIndex (string fullPath)
 		{
-			return hash.Equals(Index);
+			return System.Text.RegularExpressions.Regex.Replace(fullPath, "[^0-9a-zA-Z]+", "_");
 		}
-
+		
 	}
 }

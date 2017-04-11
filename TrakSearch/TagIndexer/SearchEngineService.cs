@@ -4,6 +4,8 @@ using Lucene.Net.Index;
 using Lucene.Net.QueryParsers;
 using Lucene.Net.QueryParsers.Classic;
 using Lucene.Net.Search;
+using Lucene.Net.Search.Spell;
+using Lucene.Net.Util;
 using Shravan.DJ.TagIndexer.Data;
 using System;
 using System.Collections.Generic;
@@ -18,9 +20,30 @@ namespace Shravan.DJ.TagIndexer
 	public class SearchEngineService : SearchEngineBase
 	{
 
-		public SearchEngineService()
-		{
+		public static List<string> LuceneSpecialCharacters = new List<string>() { "*", "?", "~", "\"", "&&", "||", "!", "^", "!", ":", "{", "}", "!" };
+		//+- && || !( ) {
+		//} [ ] ^ " ~ * ? : \
 
+		private static IndexSearcher _IndexSearcher = null;
+
+		protected static IndexSearcher Searcher
+		{
+			get
+			{
+				if (_IndexSearcher == null)
+				{
+					_IndexSearcher = new IndexSearcher(DirectoryReader.Open(_directory));
+				}
+
+				return _IndexSearcher;
+			}
+		}
+
+		public static string CurrentPartition { get; internal set; }
+
+		static SearchEngineService()
+		{
+			
 		}
 
 
@@ -31,11 +54,11 @@ namespace Shravan.DJ.TagIndexer
 
 			var bracketKeys = new List<string>() { "(", ")", "\\(\\)" };
 			var logicalKeys = new List<string>() { "+", "-" };
-			var restrictedKeys = new List<string>() { "*", "?", "~", "\"" };
+			
 			//var removeKeys = new List<string>() { "AND", "OR", "NOT" };
-			restrictedKeys.AddRange(logicalKeys);
-			restrictedKeys.AddRange(bracketKeys);
-			restrictedKeys.AddRange(Id3TagData.Fields.Select(s => s + ":"));
+			LuceneSpecialCharacters.AddRange(logicalKeys);
+			LuceneSpecialCharacters.AddRange(bracketKeys);
+			LuceneSpecialCharacters.AddRange(Id3TagData.Fields.Select(s => s + ":"));
 
 			search = search.Length > 100 ? search.Substring(0, 99) : search;
 
@@ -47,15 +70,21 @@ namespace Shravan.DJ.TagIndexer
 			}
 
 			var query = new BooleanQuery();
+			if (!string.IsNullOrEmpty(CurrentPartition.Trim()))
+			{
+				query.Add(new WildcardQuery(new Term("Index", CurrentPartition + "*")), Occur.MUST);
+			}
+
 			if (!string.IsNullOrEmpty(searchTerm.Trim()))
-				CreateQueryWithWildCard(restrictedKeys, searchTerm, query);
+			{
+				CreateQueryWithWildCard(LuceneSpecialCharacters, searchTerm, query);
+			}
+						
 			CreateKeyQueries(specialTerms, query);
 			CreateBpmQueries(specialTerms, query);
 
-
-
+			
 			return SearchInternal(query);
-
 		}
 
 		private static void CreateQueryWithWildCard(List<string> restrictedKeys, string searchTerms, BooleanQuery query)
@@ -194,11 +223,35 @@ namespace Shravan.DJ.TagIndexer
 		}
 
 
+		public static void InitDirectoryifRequried ()
+		{
+			try
+			{
+				SearchEngineService.GetIndexCount();
+			}
+			catch
+			{
+				SearchEngineService.InitDirectory();
+			}
+		}
+
+		public static void InitDirectory()
+		{
+			// init lucene
+			var analyzer = new StandardAnalyzer(LUCENE_VER, Lucene.Net.Analysis.Util.CharArraySet.EMPTY_SET);
+			using (var writer = new IndexWriter(_directory, new IndexWriterConfig(LUCENE_VER, analyzer)))
+			{
+				// close handles
+				//analyzer.Close();
+				writer.Dispose();
+			}
+		}
+
 
 		public static void AddLuceneIndex(IEnumerable<Id3TagData> tagList)
 		{
 			// init lucene
-			var analyzer = new StandardAnalyzer(LUCENE_VER);
+			var analyzer = new StandardAnalyzer(LUCENE_VER, Lucene.Net.Analysis.Util.CharArraySet.EMPTY_SET);
 			using (var writer = new IndexWriter(_directory, new IndexWriterConfig(LUCENE_VER, analyzer)))
 			{
 				List<Document> docs = new List<Document>();
@@ -208,8 +261,6 @@ namespace Shravan.DJ.TagIndexer
 					var doc = new Document();
 					PopulateLuceneDoc(tag, doc);
 					docs.Add(doc);
-
-					// add entry to index
 				}
 
 				writer.AddDocuments(docs);
@@ -220,7 +271,16 @@ namespace Shravan.DJ.TagIndexer
 			}
 		}
 
-		private static void AddOrUpdateLuceneIndex(Id3TagData id3, IndexWriter writer)
+		private static void DeleteLuceneIndex(Id3TagData id3, IndexWriter writer)
+		{
+			// remove older index entry
+
+			var searchQuery = new TermQuery(new Term("Index", id3.Index));
+			writer.DeleteDocuments(searchQuery);
+
+		}
+
+			private static void AddOrUpdateLuceneIndex(Id3TagData id3, IndexWriter writer)
 		{
 			// remove older index entry
 
@@ -244,7 +304,7 @@ namespace Shravan.DJ.TagIndexer
 			{
 				if (kv.Key == "BPM")
 				{
-					int val = (int)kv.Value;
+					int val =  Convert.ToInt32(kv.Value);
 					doc.Add(new IntField(kv.Key, val, Field.Store.YES));
 				}
 				else if (kv.Key == "Commment")
@@ -268,7 +328,7 @@ namespace Shravan.DJ.TagIndexer
 		public static void AddOrUpdateLuceneIndex(IEnumerable<Id3TagData> tagList)
 		{
 			// init lucene
-			var analyzer = new StandardAnalyzer(LUCENE_VER);
+			var analyzer = new StandardAnalyzer(LUCENE_VER, Lucene.Net.Analysis.Util.CharArraySet.EMPTY_SET);
 			using (var writer = new IndexWriter(_directory, new IndexWriterConfig(LUCENE_VER, analyzer)))
 			{
 				// add data to lucene search index (replaces older entry if any)
@@ -307,14 +367,13 @@ namespace Shravan.DJ.TagIndexer
 				return null;
 
 
-			var analyzer = new StandardAnalyzer(LUCENE_VER);
+			var analyzer = new StandardAnalyzer(LUCENE_VER, Lucene.Net.Analysis.Util.CharArraySet.EMPTY_SET);
 
 			// search by single field
 			if (!string.IsNullOrEmpty(searchField))
 			{
-				var parser = new QueryParser(LUCENE_VER, searchField, analyzer);
-				var query = ParseQuery(searchQuery, parser);
-
+				
+				var query = new TermQuery(new Term(searchField, searchQuery));
 				return query;
 			}
 			else
@@ -330,22 +389,32 @@ namespace Shravan.DJ.TagIndexer
 
 		}
 
+		public static IEnumerable<Id3TagData> SearchWithIndex(string Index)
+		{
+			var analyzer = new StandardAnalyzer(LUCENE_VER, Lucene.Net.Analysis.Util.CharArraySet.EMPTY_SET);
+
+			var query = new TermQuery(new Term("Index", Index));
+			
+			var hits = Searcher.Search(query, 10).ScoreDocs;
+			var results = MapLuceneToDataList(hits, Searcher);
+
+			return results;
+			
+		}
 
 		private static IEnumerable<Id3TagData> SearchInternal(Query query)
 		{
 			var hits_limit = 500;
-			var analyzer = new StandardAnalyzer(LUCENE_VER);
+			var analyzer = new StandardAnalyzer(LUCENE_VER, Lucene.Net.Analysis.Util.CharArraySet.EMPTY_SET);
 
 
-			var searcher = new IndexSearcher(DirectoryReader.Open(_directory));
-			{
-				//searcher.SetDefaultFieldSortScoring(true, true);
-				var hits = searcher.Search(query, hits_limit).ScoreDocs;
-				var results = MapLuceneToDataList(hits, searcher);
-				//analyzer.Close();
-				//searcher.Dispose();
-				return results;
-			}
+			//searcher.SetDefaultFieldSortScoring(true, true);
+			var hits = Searcher.Search(query, hits_limit).ScoreDocs;
+			var results = MapLuceneToDataList(hits, Searcher);
+			//analyzer.Close();
+			//searcher.Dispose();
+			return results;
+			
 		}
 		#region LuceneMapping
 
@@ -381,21 +450,25 @@ namespace Shravan.DJ.TagIndexer
 
 
 
+		internal static int GetIndexCount()
+		{
+			var reader = DirectoryReader.Open(_directory);
+			return reader.MaxDoc;
+		}
+
+
 		internal static IEnumerable<Id3TagData> GetAllIndexRecords()
 		{
 			throw new NotImplementedException();
-
-			// validate search index
-			//if (!System.IO.Directory.EnumerateFiles(_luceneDir).Any())
-			//	return new List<Id3TagData>();
-
-			//// set up lucene searcher
-
 			//var reader = DirectoryReader.Open(_directory);
+			//reader.MaxDoc;
+				
 			//var searcher = new IndexSearcher(reader);
-			
+			//MultiFields.GetFields(reader);
+
 			//var docs = new List<Document>();
 			//var term = reader
+				
 			//while (term.Next()) docs.Add(searcher.Doc(term.Doc));
 			////reader.Dispose();
 			////searcher.Dispose();

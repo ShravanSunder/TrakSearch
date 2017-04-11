@@ -15,13 +15,9 @@ using System.Linq;
 
 namespace Shravan.DJ.TagIndexer
 {
-	public abstract class SearchEngineBase
+	public class SearchEngineBase
 	{
-		public SearchEngineBase()
-		{
-
-		}
-
+		
 
 		protected static Lucene.Net.Util.LuceneVersion LUCENE_VER = Lucene.Net.Util.LuceneVersion.LUCENE_48;
 

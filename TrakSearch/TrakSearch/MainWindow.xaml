@@ -42,7 +42,9 @@
                     <Label Name="ResultCountLabel" Width="30" FontSize="10"></Label>
                     <Button Name="CancelButton" DockPanel.Dock="Right" Click="CancelButton_Click" Padding="3,2,3,2">X</Button>
                     <Button Name="SearchButton" DockPanel.Dock="Right" Click="SearchButton_Click" Padding="6,2,6,2" TabIndex="5">Search</Button>
-                    <Button Name="FolderButton" DockPanel.Dock="Right" Click="FolderButton_Click" Padding="6,2,6,2">Folder</Button>
+                    <Button Name="FolderButton" DockPanel.Dock="Right" Click="FolderButton_Click" Padding="6,2,6,2">
+                        <Image Source="./Resources/Folder-Open.png" Height="15" Width="15" />
+                    </Button>
                 </StackPanel>
                 <Label>Search</Label>
                 <TextBox Name="SearchBox" KeyUp="SearchBox_KeyUp" FontSize="14"  TabIndex="4" ></TextBox>
@@ -51,11 +53,10 @@
                 <DataGrid Name="MusicData" MouseDoubleClick="MusicData_MouseDoubleClick" 
                           AlternatingRowBackground="{StaticResource LightBlack}"
                           >
-                
+
                 </DataGrid>
                 <Button Name="Folder2Button" Click="FolderButton_Click" Padding="6,2,6,2">Pick Folder</Button>
             </Grid>
-
         </DockPanel>
     </Grid>
 </Window>

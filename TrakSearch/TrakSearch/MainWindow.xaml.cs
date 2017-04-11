@@ -197,7 +197,6 @@ namespace Shravan.DJ.TrakSearch
 		{
 			FolderButton.IsEnabled = false;
 			Folder2Button.IsEnabled = false;
-			FolderButton.Content = "Loading...";
 			Folder2Button.Content = "Loading...";
 
 			var dialog = new WPFFolderBrowser.WPFFolderBrowserDialog("Select Music Folder");
@@ -218,10 +217,10 @@ namespace Shravan.DJ.TrakSearch
 				SearchEngineService.ClearLuceneIndex();
 
 				AllTagData.IndexDirectory(folder);
-				
+
 				//SearchEngineService.AddOrUpdateLuceneIndex(AllTagData.tagList);
 				SearchEngineService.AddLuceneIndex(AllTagData.tagList);
-				
+
 
 				Folder2Button.Visibility = Visibility.Hidden;
 
@@ -235,7 +234,6 @@ namespace Shravan.DJ.TrakSearch
 				var time = timer.ElapsedMilliseconds;
 			}
 
-			FolderButton.Content = "Folder";
 			FolderButton.IsEnabled = true;
 
 		}

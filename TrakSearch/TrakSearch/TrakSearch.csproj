@@ -169,5 +169,12 @@
   <ItemGroup>
     <Resource Include="icon.ico" />
   </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\Circled Pause Filled-100.png" />
+    <Resource Include="Resources\Circled Play Filled-100.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\Folder-Open.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

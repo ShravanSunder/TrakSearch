@@ -239,7 +239,7 @@ namespace Shravan.DJ.TrakSearch
 
 			var largeColumn = new List<string> { "Comment", "FullPath" };
 			var smallColumn = new List<string> { "BPM", "Key", "Energy", };
-			var normalColumn = new List<string> { "Title", "Artist", "Album" };
+			var normalColumn = new List<string> { "Title", "Artist", "Album", "Publisher", "Remixer" };
 
 			var windowSize = this.RenderSize.Width > 600 ? this.RenderSize.Width : 600;
 

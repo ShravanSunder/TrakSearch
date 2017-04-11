@@ -86,9 +86,11 @@ namespace Shravan.DJ.TagIndexer.Data
 					data.Energy = metaData.Album?.Contains("starzz") ?? false ? metaData.Album : "";
 					data.BPM = metaData.BeatsPerMinute;
 					data.Comment = metaData.Comment;
-					data.Artist = metaData.Performers.FirstOrDefault();
-					data.Key = metaData.FirstOrDefault(f => f.FrameId == ByteVector.FromString("TKEY", StringType.UTF8)).ToString();
-					data.Publisher = metaData.FirstOrDefault(f => f.FrameId == ByteVector.FromString("TPUB", StringType.UTF8)).ToString();
+					data.Artist = metaData.Performers?.FirstOrDefault() ?? "";
+					data.Key = metaData.FirstOrDefault(f => f.FrameId == ByteVector.FromString("TKEY", StringType.UTF8))?.ToString();
+					data.Publisher = metaData.FirstOrDefault(f => f.FrameId == ByteVector.FromString("TPUB", StringType.UTF8))?.ToString();
+					data.Publisher = data.Publisher ?? metaData.FirstOrDefault(f => f.FrameId == ByteVector.FromString("TPE2", StringType.UTF8))?.ToString() ?? "";
+					data.Remixer = metaData.FirstOrDefault(f => f.FrameId == ByteVector.FromString("TPE4", StringType.UTF8))?.ToString() ?? "";
 				}
 
 
@@ -101,6 +103,7 @@ namespace Shravan.DJ.TagIndexer.Data
 				//data.Pictures = metaData.Pictures;
 				Artist = data.Artist;
 				Key = data.Key;
+				Remixer = data.Remixer;
 
 				_innerData = (IDictionary<string, object>)data;
 			}

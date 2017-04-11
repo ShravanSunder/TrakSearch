@@ -16,6 +16,7 @@ namespace Shravan.DJ.TagIndexer.Data
 		public string Comment { get; protected set; }
 		public string Album { get; protected set; }
 		public string FullPath { get; protected set; }
+		public string Publisher { get; protected set; }
 
 	}
 }

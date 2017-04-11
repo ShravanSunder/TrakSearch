@@ -88,43 +88,43 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="..\packages\ICU4NET-ICU4C55.1-bin32.1.0.0\ref\icudt55.dll">
-      <Link>icudt55.dll</Link>
+      <Link>Lucene dll\icudt55.dll</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\packages\ICU4NET-ICU4C55.1-bin32.1.0.0\ref\icuin55.dll">
-      <Link>icuin55.dll</Link>
+      <Link>Lucene dll\icuin55.dll</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\packages\ICU4NET-ICU4C55.1-bin32.1.0.0\ref\icuio55.dll">
-      <Link>icuio55.dll</Link>
+      <Link>Lucene dll\icuio55.dll</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\packages\ICU4NET-ICU4C55.1-bin32.1.0.0\ref\icule55.dll">
-      <Link>icule55.dll</Link>
+      <Link>Lucene dll\icule55.dll</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\packages\ICU4NET-ICU4C55.1-bin32.1.0.0\ref\iculx55.dll">
-      <Link>iculx55.dll</Link>
+      <Link>Lucene dll\iculx55.dll</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\packages\ICU4NET-ICU4C55.1-bin32.1.0.0\ref\icutu55.dll">
-      <Link>icutu55.dll</Link>
+      <Link>Lucene dll\icutu55.dll</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\packages\ICU4NET-ICU4C55.1-bin32.1.0.0\ref\icuuc55.dll">
-      <Link>icuuc55.dll</Link>
+      <Link>Lucene dll\icuuc55.dll</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>

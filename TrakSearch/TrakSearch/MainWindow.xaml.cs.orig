@@ -213,10 +213,21 @@ namespace Shravan.DJ.TrakSearch
 				this.MusicData.Items.Refresh();
 
 				var folder = dialog.FileName;
-				
+<<<<<<< HEAD
+
+				SearchEngineService.ClearLuceneIndex();
+
 				AllTagData.IndexDirectory(folder);
 
+				//SearchEngineService.AddOrUpdateLuceneIndex(AllTagData.tagList);
+				SearchEngineService.AddLuceneIndex(AllTagData.tagList);
+
+
+=======
 				
+				AllTagData.IndexDirectory(folder);
+				
+>>>>>>> 0270f3cebc89c808176e38731ba897d192bc0f0d
 				Folder2Button.Visibility = Visibility.Hidden;
 
 				this.MusicData.ItemsSource = AllTagData.TagList.Cast<Id3TagDataBase>();
@@ -292,24 +303,13 @@ namespace Shravan.DJ.TrakSearch
 
 		private void PlayerPlay_HotKeyCommand(object sender, ExecutedRoutedEventArgs e)
 		{
-			PlayMusic();
-		}
-
-		private void PlayMusic()
-		{
 			var data = (Id3TagData)MusicData.SelectedItem;
 			var device = MusicPlayer.GetDefaultRenderDevice();
 			if (data != null)
 			{
 				_Player.Open(data.FullPath, device);
 				_Player.Play();
-			//	PlayButton.Content = Image.load
 			}
-		}
-		
-		private void StopMusic ()
-		{
-			_Player.Stop();
 		}
 
 		private void PlayerRewind_HotKeyCommand(object sender, ExecutedRoutedEventArgs e)
@@ -325,7 +325,8 @@ namespace Shravan.DJ.TrakSearch
 
 		private void PlayerStop_HotKeyCommand(object sender, ExecutedRoutedEventArgs e)
 		{
-			StopMusic();
+			_Player.Stop();
+
 		}
 
 		private void NumberSearchBox_PreviewTextInput(object sender, TextCompositionEventArgs e)
@@ -389,11 +390,6 @@ namespace Shravan.DJ.TrakSearch
 			_Player.Stop();
 			_Player.Dispose();
 			_Player = null;
-		}
-
-		private void PlayButton_Click(object sender, RoutedEventArgs e)
-		{
-
 		}
 	}
 }

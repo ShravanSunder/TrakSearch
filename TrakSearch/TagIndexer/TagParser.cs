@@ -23,11 +23,11 @@ namespace Shravan.DJ.TagIndexer
 
 
 		public TagParser()
-		{	
+		{
 			TagList = new ConcurrentBag<Id3TagData>();
 		}
-		
-		public void IndexDirectory (string path)
+
+		public void IndexDirectory(string path)
 		{
 			IndexDirectory(new DirectoryInfo(path));
 
@@ -53,7 +53,7 @@ namespace Shravan.DJ.TagIndexer
 
 				var tasks = new List<Task>();
 
-				const int BATCH_SIZE = 1;
+				const int BATCH_SIZE = 50;
 				int batchCount = 0;
 				while (batchCount < files.Count())
 				{
@@ -120,9 +120,9 @@ namespace Shravan.DJ.TagIndexer
 							TagList.Add(tagDataFromFile);
 							updateIndex.Add(tagDataFromFile);
 						}
-						
-						
-						
+
+
+
 					}
 					else if (tagDataFromIndex.Count() == 1)
 					{
@@ -158,7 +158,7 @@ namespace Shravan.DJ.TagIndexer
 		{
 			if (!span.HasValue)
 			{
-				span =  TimeSpan.FromMilliseconds(1000);
+				span = TimeSpan.FromMilliseconds(1000);
 			}
 
 			long ticks = dt.Ticks / span.Value.Ticks;

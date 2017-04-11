@@ -36,8 +36,7 @@ namespace Shravan.DJ.TagIndexer.Data
 			"Energy",
 			"Album"
 		};
-
-
+		
 
 		public Id3TagData(System.IO.FileInfo file, TagLib.Id3v2.Tag metaData)
 		{
@@ -89,6 +88,7 @@ namespace Shravan.DJ.TagIndexer.Data
 					data.Comment = metaData.Comment;
 					data.Artist = metaData.Performers.FirstOrDefault();
 					data.Key = metaData.FirstOrDefault(f => f.FrameId == ByteVector.FromString("TKEY", StringType.UTF8)).ToString();
+					data.Publisher = metaData.FirstOrDefault(f => f.FrameId == ByteVector.FromString("TPUB", StringType.UTF8)).ToString();
 				}
 
 
@@ -97,6 +97,7 @@ namespace Shravan.DJ.TagIndexer.Data
 				Energy = data.Energy;
 				BPM = data.BPM.ToString();
 				Comment = data.Comment;
+				Publisher = data.Publisher;
 				//data.Pictures = metaData.Pictures;
 				Artist = data.Artist;
 				Key = data.Key;
@@ -108,7 +109,7 @@ namespace Shravan.DJ.TagIndexer.Data
 				_innerData = (IDictionary<string, object>)new ExpandoObject();
 			}
 		}
-		
+
 
 		public bool IndexEqualsPath(string fullPath)
 		{
@@ -117,10 +118,10 @@ namespace Shravan.DJ.TagIndexer.Data
 			return input.Equals(Index);
 		}
 
-		public static string CreateIndex (string fullPath)
+		public static string CreateIndex(string fullPath)
 		{
 			return System.Text.RegularExpressions.Regex.Replace(fullPath, "[^0-9a-zA-Z]+", "_");
 		}
-		
+
 	}
 }

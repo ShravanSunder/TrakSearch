@@ -180,7 +180,7 @@ namespace Shravan.DJ.TagIndexer
 			var bpmTerms = bpmInputs
 				.Select(s =>
 				{
-					var bpmString = s.Replace("BPM:", "");
+					var bpmString = s.Replace("BPM:", "").Trim();
 					int bpm = 0;
 					int.TryParse(bpmString, out bpm);
 					return bpm;
@@ -203,16 +203,19 @@ namespace Shravan.DJ.TagIndexer
 			{
 				try
 				{
-					var num = int.Parse(key.Remove(key.Length - 1, 1).Replace("Key:", ""));
-					var letter = key[key.Length - 1].ToString();
+					
+					var numStr = Regex.Replace(key, "[^0-9]", "");
+					var num = int.Parse(numStr);
+					var letter = Regex.Replace(key, "[^dDmM]", "");
 
-					if (num >= 1 && num <= 12 && (letter == "d" || letter == "m"))
+					if (num >= 1 && num <= 12)
 					{
 
 						result.Add(key.Replace("Key:", ""));
 						result.Add((num + 1 == 13 ? 1 : num + 1).ToString() + letter);
 						result.Add((num - 1 == 0 ? 12 : num - 1).ToString() + letter);
 						result.Add(num.ToString() + (letter == "m" ? "d" : "m"));
+
 					}
 				}
 				catch
@@ -446,7 +449,7 @@ namespace Shravan.DJ.TagIndexer
 		private static IEnumerable<Id3TagData> MapLuceneToDataList(IEnumerable<ScoreDoc> hits,
 			 IndexSearcher searcher)
 		{
-			var top = hits.OrderByDescending(h => h.Score).Take(100);
+			var top = hits.OrderByDescending(h => h.Score).Take(500);
 
 			var find = top;
 

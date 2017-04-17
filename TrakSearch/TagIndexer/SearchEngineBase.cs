@@ -21,7 +21,7 @@ namespace Shravan.DJ.TagIndexer
 
 		protected static Lucene.Net.Util.LuceneVersion LUCENE_VER = Lucene.Net.Util.LuceneVersion.LUCENE_48;
 
-		protected static string _luceneDir = System.IO.Path.GetTempPath() + @"\Lucene\";
+		protected static string _luceneDir = System.IO.Path.GetTempPath() + @"\TrakSearch.Lucene\";
 		protected static FSDirectory _directoryTemp;
 		protected static FSDirectory _directory
 		{

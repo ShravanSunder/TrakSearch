@@ -244,6 +244,8 @@ namespace Shravan.DJ.TagIndexer
 				// close handles
 				//analyzer.Close();
 				writer.Dispose();
+				_IndexSearcher?.IndexReader.Dispose();
+				_IndexSearcher = null;
 			}
 		}
 
@@ -268,6 +270,8 @@ namespace Shravan.DJ.TagIndexer
 				// close handles
 				//analyzer.Close();
 				writer.Dispose();
+				_IndexSearcher?.IndexReader.Dispose();
+				_IndexSearcher = null;
 			}
 		}
 
@@ -340,6 +344,8 @@ namespace Shravan.DJ.TagIndexer
 				// close handles
 				//analyzer.Close();
 				writer.Dispose();
+				_IndexSearcher?.IndexReader.Dispose();
+				_IndexSearcher = null;
 			}
 		}
 

@@ -248,14 +248,14 @@ namespace Shravan.DJ.TrakSearch
 				var header = c.Header;
 				if (largeColumn.Any(w => c.Header.ToString() == w))
 				{
-					c.MaxWidth = windowSize * 0.5;
+					c.MaxWidth = windowSize * 0.4;
 					if (c.Width.Value > c.MaxWidth)
 						c.Width = new DataGridLength(c.MaxWidth, DataGridLengthUnitType.Star, c.Width.DesiredValue, c.MaxWidth);
 
 				}
 				else if (normalColumn.Any(w => c.Header.ToString() == w))
 				{
-					c.MaxWidth = windowSize * 0.15;
+					c.MaxWidth = windowSize * 0.10;
 
 					if (c.Width.DisplayValue > c.MaxWidth)
 					{
@@ -265,7 +265,7 @@ namespace Shravan.DJ.TrakSearch
 				}
 				else if (smallColumn.Any(w => c.Header.ToString() == w))
 				{
-					c.MaxWidth = windowSize * 0.05;
+					c.MaxWidth = windowSize * 0.04;
 
 					if (c.Width.Value > c.MaxWidth)
 						c.Width = new DataGridLength(c.MaxWidth, DataGridLengthUnitType.Star, c.Width.DesiredValue, c.MaxWidth);

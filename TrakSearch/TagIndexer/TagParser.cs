@@ -53,7 +53,7 @@ namespace Shravan.DJ.TagIndexer
 
 				var tasks = new List<Task>();
 
-				const int BATCH_SIZE = 50;
+				const int BATCH_SIZE = 25;
 				int batchCount = 0;
 				while (batchCount < files.Count())
 				{

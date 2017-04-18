@@ -1,0 +1,33 @@
+﻿<Window x:Class="Shravan.DJ.TrakSearch.SettingsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Shravan.DJ.TrakSearch"
+        Style="{StaticResource {x:Type Window}}"
+        mc:Ignorable="d"
+        Title="SettingsWindow" Height="350" Width="300">
+    <DockPanel>
+        <Grid DockPanel.Dock="Bottom">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <Button Width="50" Margin="10,1" Grid.Column="0">OK</Button>
+            <Button Width="50" Margin="10,1" Grid.Column="2">Cancel</Button>
+        </Grid>
+        <StackPanel>
+            <StackPanel Orientation="Horizontal" Margin="10,5">
+                <Label FontWeight="Bold">Folder:</Label>
+                <Label Name="CurrentFolderLabel">Folder</Label>
+            </StackPanel>
+            <Button Margin="10,5" ToolTip="Scan the current folder for changes in music files">Rescan Current Folder</Button>
+            <Button Margin="10,5" ToolTip="Recreate the index from scratch">Reset Library</Button>
+        </StackPanel>
+        
+    </DockPanel>
+</Window>

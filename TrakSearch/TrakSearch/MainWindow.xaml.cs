@@ -22,7 +22,7 @@ namespace Shravan.DJ.TrakSearch
 	{
 		TagParser AllTagData = new TagParser();
 		SearchEngineService Search = new SearchEngineService();
-		Stopwatch KeyTimer = new Stopwatch();
+		System.Windows.Threading.DispatcherTimer KeyTimer;
 		Stopwatch WindowTimer = new Stopwatch();
 		bool Searching = false;
 
@@ -35,7 +35,8 @@ namespace Shravan.DJ.TrakSearch
 		Mutex SearchingMutex = new Mutex();
 
 		MusicPlayer _Player;
-		
+
+		public bool AutoSearchTrigger { get; private set; }
 
 		public MainWindow()
 		{
@@ -49,7 +50,11 @@ namespace Shravan.DJ.TrakSearch
 				this.MusicData.ItemsSource = new List<Id3TagData>();
 				this.MusicData.Items.Refresh();
 
+				KeyTimer = new System.Windows.Threading.DispatcherTimer();
+				KeyTimer.Interval = new TimeSpan(0, 0, 0, 0, 333);
+				KeyTimer.Tick += new EventHandler(Event_KeyTimerTick);
 				KeyTimer.Start();
+				
 				WindowTimer.Start();
 
 
@@ -75,10 +80,37 @@ namespace Shravan.DJ.TrakSearch
 
 		}
 
+		private void Event_KeyTimerTick(object sender, EventArgs e)
+		{
+			if (!AutoSearchTrigger)
+				return;
+
+			if (Searching)
+				return;
+
+
+			if (! (string.IsNullOrEmpty(SearchBox.Text.Trim())
+					&& string.IsNullOrEmpty(BpmSearchBox.Text.Trim())
+					&& string.IsNullOrEmpty(KeySearchBox.Text.Trim())
+					&& string.IsNullOrEmpty(EnergySearchBox.Text.Trim())) )
+			{
+				AutoSearchTrigger = false;
+				SearchMusic(SearchBox.Text, BpmSearchBox.Text, KeySearchBox.Text, EnergySearchBox.Text);
+			}
+			else
+			{
+				AutoSearchTrigger = false;
+				ClearSearch();
+			}
+		}
+
 		private void SearchBox_KeyUp(object sender, KeyEventArgs e)
 		{
+
 			if (e.Key == Key.Enter)
 			{
+				AutoSearchTrigger = true;
+
 				if (string.IsNullOrEmpty(SearchBox.Text.Trim())
 					&& string.IsNullOrEmpty(BpmSearchBox.Text.Trim())
 					&& string.IsNullOrEmpty(KeySearchBox.Text.Trim())
@@ -89,11 +121,20 @@ namespace Shravan.DJ.TrakSearch
 				else
 				{
 					SearchMusic(SearchBox.Text, BpmSearchBox.Text, KeySearchBox.Text, EnergySearchBox.Text);
-					KeyTimer.Restart();
 				}
+			}
+			else if (
+				((e.Key >= Key.A && e.Key <= Key.Z) || (e.Key >= Key.D0 && e.Key <= Key.D9) || (e.Key >= Key.NumPad0 && e.Key <= Key.NumPad9)
+					&& (Keyboard.Modifiers & ModifierKeys.None) == ModifierKeys.None)
+				|| ((e.Key == Key.V || e.Key == Key.X) && (Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control)
+				|| (e.Key == Key.Back || e.Key == Key.Delete)
+				)
+			{
+				AutoSearchTrigger = true;
 			}
 			else if (e.Key == Key.Escape)
 			{
+				AutoSearchTrigger = false;
 				ClearSearch();
 			}
 		}

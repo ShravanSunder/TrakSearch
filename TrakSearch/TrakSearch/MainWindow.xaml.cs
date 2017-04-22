@@ -123,12 +123,9 @@ namespace Shravan.DJ.TrakSearch
 					SearchMusic(SearchBox.Text, BpmSearchBox.Text, KeySearchBox.Text, EnergySearchBox.Text);
 				}
 			}
-			else if (
-				((e.Key >= Key.A && e.Key <= Key.Z) || (e.Key >= Key.D0 && e.Key <= Key.D9) || (e.Key >= Key.NumPad0 && e.Key <= Key.NumPad9)
-					&& (Keyboard.Modifiers & ModifierKeys.None) == ModifierKeys.None)
-				|| ((e.Key == Key.V || e.Key == Key.X) && (Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control)
-				|| (e.Key == Key.Back || e.Key == Key.Delete)
-				)
+			else if ( (((e.Key >= Key.A && e.Key <= Key.Z) || (e.Key >= Key.D0 && e.Key <= Key.D9) || (e.Key >= Key.NumPad0 && e.Key <= Key.NumPad9)
+					|| (e.Key == Key.Back || e.Key == Key.Delete)) && Keyboard.Modifiers == ModifierKeys.None )
+				|| ((e.Key == Key.V || e.Key == Key.X) && (Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control) )
 			{
 				AutoSearchTrigger = true;
 			}
@@ -136,6 +133,31 @@ namespace Shravan.DJ.TrakSearch
 			{
 				AutoSearchTrigger = false;
 				ClearSearch();
+			}
+			else if (e.Key == Key.Down || e.Key == Key.Up)
+			{
+
+				if (MusicData.SelectedIndex == 0 && e.Key == Key.Up)
+				{
+					SearchBox.Focus();
+					return;
+				}
+				else if (MusicData.SelectedIndex < 0)
+				{
+					MusicData.SelectedIndex = 0;
+				}
+				
+				DataGridRow row = (DataGridRow)MusicData.ItemContainerGenerator.ContainerFromIndex(MusicData.SelectedIndex);
+				row?.MoveFocus(new TraversalRequest(FocusNavigationDirection.Next));
+				
+			}
+			else if ( (e.Key == Key.F && (Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control)
+				|| e.Key == Key.F1 || e.Key == Key.F3)
+			{
+				if (SearchBox.Focus())
+				{
+					SearchBox.SelectAll();
+				}
 			}
 		}
 

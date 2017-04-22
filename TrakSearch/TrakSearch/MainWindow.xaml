@@ -95,7 +95,8 @@
                           AlternatingRowBackground="{StaticResource LightBlack}" FontSize="12"
                           SelectionMode="Single"
                           EnableColumnVirtualization="True"  EnableRowVirtualization ="True"
-                          MaxWidth="3840" MaxHeight="2160">
+                          MaxWidth="3840" MaxHeight="2160"
+                          KeyUp="SearchBox_KeyUp">
 
                 </DataGrid>
                 <Button Name="Folder2Button" Click="FolderButton_Click" Padding="6,2,6,2">Pick Folder</Button>

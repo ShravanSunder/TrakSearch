@@ -35,6 +35,7 @@ namespace Shravan.DJ.TrakSearch
 		Mutex SearchingMutex = new Mutex();
 
 		MusicPlayer _Player;
+		
 
 		public MainWindow()
 		{
@@ -303,24 +304,29 @@ namespace Shravan.DJ.TrakSearch
 			{
 				_Player.Open(data.FullPath, device);
 				_Player.Play();
-			//	PlayButton.Content = Image.load
+				PlayIndicator.IsChecked = true;
+			}
+			else
+			{
+				PlayIndicator.IsChecked = false;
 			}
 		}
 		
 		private void StopMusic ()
 		{
 			_Player.Stop();
+			PlayIndicator.IsChecked = false;
 		}
 
 		private void PlayerRewind_HotKeyCommand(object sender, ExecutedRoutedEventArgs e)
 		{
-			_Player.Position = _Player.Position.Subtract(new TimeSpan(0, 0, 30));
+			_Player.Position = _Player.Position.Subtract(new TimeSpan(0, 0, 20));
 		}
 
 
 		private void PlayerForward_HotKeyCommand(object sender, ExecutedRoutedEventArgs e)
 		{
-			_Player.Position = _Player.Position.Add(new TimeSpan(0, 0, 30));
+			_Player.Position = _Player.Position.Add(new TimeSpan(0, 0, 20));
 		}
 
 		private void PlayerStop_HotKeyCommand(object sender, ExecutedRoutedEventArgs e)
@@ -391,9 +397,18 @@ namespace Shravan.DJ.TrakSearch
 			_Player = null;
 		}
 
-		private void PlayButton_Click(object sender, RoutedEventArgs e)
+		private void PlayIndicator_Click(object sender, RoutedEventArgs e)
 		{
+			if (_Player.PlaybackState != CSCore.SoundOut.PlaybackState.Playing)
+			{
+				PlayMusic();
+			}
+			else
+			{
+				StopMusic();
+			}
 
+			PlayIndicator.UpdateLayout();
 		}
 	}
 }

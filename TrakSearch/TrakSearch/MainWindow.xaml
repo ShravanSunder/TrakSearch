@@ -11,6 +11,7 @@
         SizeChanged="Window_SizeChanged"
         PreviewKeyDown="Window_PreviewKeyDown"
         Closing="Window_Closing">
+    
     <Window.Resources>
         <SolidColorBrush x:Key="LightBlack" Color="#282828" />
     </Window.Resources>
@@ -25,7 +26,44 @@
         <DockPanel HorizontalAlignment="Stretch" Margin="1,1,1,1" VerticalAlignment="Stretch">
             <DockPanel DockPanel.Dock="Top">
                  <StackPanel Orientation="Horizontal" DockPanel.Dock="Left">
-                    <!-- <Button Name="PlayButton" Click="PlayButton_Click"></Button> -->
+                    <ToggleButton Name="PlayIndicator" ToolTip="CTRL-Up to Play, CTRL-Down to Stop, CTRL-Left/Right to seek"
+                                  Click="PlayIndicator_Click" Padding="6,2,6,2" >
+                        <ToggleButton.Style>
+                            <Style TargetType="{x:Type ToggleButton}" BasedOn="{StaticResource {x:Type ToggleButton}}">
+                                <Style.Triggers>
+                                    <Trigger Property="IsChecked" Value="True">
+                                        <Setter Property="Content">
+                                            <Setter.Value>
+                                                <Image Source="./Resources/Sound-On-32x32.png" Width="20" Height="20"/>
+                                            </Setter.Value>
+                                        </Setter>
+                                        <Trigger.EnterActions>
+                                            <BeginStoryboard x:Name="PlayStoryboard">
+                                                <Storyboard RepeatBehavior="Forever" AutoReverse="True">
+                                                    <DoubleAnimation Storyboard.TargetProperty="Opacity" To="0.5" Duration="0:0:0.33" />
+                                                </Storyboard>
+                                            </BeginStoryboard>
+                                        </Trigger.EnterActions>
+                                    </Trigger>
+                                    <Trigger Property="IsChecked" Value="False">
+                                        <Setter Property="Content">
+                                            <Setter.Value>
+                                                <Image Source="./Resources/Sound-Off-32x32.png" Width="20" Height="20"/>
+                                            </Setter.Value>
+                                        </Setter>
+
+                                        <Trigger.EnterActions>
+                                            <StopStoryboard BeginStoryboardName="PlayStoryboard"></StopStoryboard>
+                                        </Trigger.EnterActions>
+                                    </Trigger>
+                                    
+                                </Style.Triggers>
+                                
+                            </Style>
+                        </ToggleButton.Style>
+                    </ToggleButton>
+                     
+                     
                     <Label>BPM</Label>
                     <TextBox Name="BpmSearchBox" 
                              KeyUp="SearchBox_KeyUp" PreviewTextInput="NumberSearchBox_PreviewTextInput" 

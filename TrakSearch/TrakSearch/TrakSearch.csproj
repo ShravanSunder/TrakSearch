@@ -188,4 +188,7 @@
     <Resource Include="Resources\Search-32x32.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>call $(ProjectDir)CopyPublishFiles.bat</PostBuildEvent>
+  </PropertyGroup>
 </Project>

@@ -83,14 +83,14 @@ namespace Shravan.DJ.TrakPlayer
 			get
 			{
 				if (_soundOut != null)
-					return Math.Min(100, Math.Max((int)(_soundOut.Volume * 100), 0));
-				return 100;
+					return Math.Min(90, Math.Max((int)(_soundOut.Volume * 100), 0));
+				return 90;
 			}
 			set
 			{
 				if (_soundOut != null)
 				{
-					_soundOut.Volume = Math.Min(1.0f, Math.Max(value / 100f, 0f));
+					_soundOut.Volume = Math.Min(0.9f, Math.Max(value / 100f, 0f));
 				}
 			}
 		}
@@ -102,7 +102,7 @@ namespace Shravan.DJ.TrakPlayer
 			_waveSource =
 				 CodecFactory.Instance.GetCodec(filename)
 					  .ToSampleSource()
-					  .ToMono()
+					  .ToStereo()
 					  .ToWaveSource();
 			_soundOut = new WasapiOut() { Latency = 100, Device = device };
 			_soundOut.Initialize(_waveSource);

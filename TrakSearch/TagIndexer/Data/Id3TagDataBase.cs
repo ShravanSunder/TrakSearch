@@ -12,7 +12,7 @@ namespace Shravan.DJ.TagIndexer.Data
 		public string Artist { get; protected set; }
 		public string Key { get; protected set; }
 		public string Energy { get; protected set; }
-		public string BPM { get; protected set; }
+		public int BPM { get; protected set; }
 		public string Comment { get; protected set; }
 		public string Album { get; protected set; }
 		public string Publisher { get; protected set; }

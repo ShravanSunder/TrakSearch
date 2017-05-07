@@ -12,6 +12,7 @@ using System.Threading;
 using System.Text;
 using System.Text.RegularExpressions;
 using Shravan.DJ.TrakPlayer;
+using System.Windows.Data;
 
 namespace Shravan.DJ.TrakSearch
 {
@@ -33,8 +34,10 @@ namespace Shravan.DJ.TrakSearch
 		public static RoutedCommand PlayerStopHotkey = new RoutedCommand();
 
 		Mutex SearchingMutex = new Mutex();
+		DataGridColumn _MusicDataSortColumn;
 
 		MusicPlayer _Player;
+		
 
 		public bool AutoSearchTrigger { get; private set; }
 
@@ -237,6 +240,12 @@ namespace Shravan.DJ.TrakSearch
 			{
 				MusicData.ItemsSource = data;
 				ResultCountLabel.Content = data.Count();
+				if (_MusicDataSortColumn != null)
+				{
+					MusicData.Items.SortDescriptions.Add(
+						new System.ComponentModel.SortDescription(_MusicDataSortColumn.SortMemberPath, _MusicDataSortColumn.SortDirection ?? System.ComponentModel.ListSortDirection.Ascending));
+
+				}
 				MusicData.Items.Refresh();
 			});
 		}
@@ -473,5 +482,14 @@ namespace Shravan.DJ.TrakSearch
 
 			PlayIndicator.UpdateLayout();
 		}
+
+
+		
+		private void MusicData_Sorting(object sender, DataGridSortingEventArgs e)
+		{
+			_MusicDataSortColumn = e.Column;
+			
+		}
+		
 	}
 }

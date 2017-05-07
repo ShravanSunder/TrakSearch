@@ -97,7 +97,9 @@ namespace Shravan.DJ.TagIndexer.Data
 				Title = data.Title;
 				Album = data.Album;
 				Energy = data.Energy;
-				BPM = data.BPM.ToString();
+				int bpm = 0;
+				int.TryParse(data.BPM, out bpm);
+				BPM = bpm;
 				Comment = data.Comment;
 				Publisher = data.Publisher;
 				//data.Pictures = metaData.Pictures;

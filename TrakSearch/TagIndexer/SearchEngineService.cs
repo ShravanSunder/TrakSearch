@@ -83,7 +83,8 @@ namespace Shravan.DJ.TagIndexer
 			CreateKeyQueries(specialTerms, query);
 			CreateBpmQueries(specialTerms, query);
 
-			
+
+
 			return SearchInternal(query);
 		}
 
@@ -322,6 +323,11 @@ namespace Shravan.DJ.TagIndexer
 					doc.Add(new TextField(kv.Key, val ?? "", Field.Store.YES));
 					doc.Add(new TextField(kv.Key + "_Split", val ?? "", Field.Store.NO));
 
+				}
+				else if (kv.Value.GetType == typeof(int) || kv.Value.GetType == typeof(uint))
+				{
+					int val = Convert.ToInt32(kv.Value);
+					doc.Add(new IntField(kv.Key, val, Field.Store.YES));
 				}
 				else
 				{

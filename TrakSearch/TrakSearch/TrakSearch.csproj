@@ -27,7 +27,7 @@
     <ProductName>DJ Trak Search</ProductName>
     <PublisherName>Shravan</PublisherName>
     <OpenBrowserOnPublish>false</OpenBrowserOnPublish>
-    <ApplicationRevision>5</ApplicationRevision>
+    <ApplicationRevision>6</ApplicationRevision>
     <ApplicationVersion>2.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
@@ -200,6 +200,9 @@
   <ItemGroup>
     <Resource Include="Resources\Sound-Off-32x32.png" />
     <Resource Include="Resources\Sound-On-32x32.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\window-close-32x32.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

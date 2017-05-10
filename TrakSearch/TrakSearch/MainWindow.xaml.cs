@@ -75,13 +75,12 @@ namespace Shravan.DJ.TrakSearch
 				PlayerForwardHotkey.InputGestures.Add(new KeyGesture(Key.Right, ModifierKeys.Control));
 				PlayerStopHotkey.InputGestures.Add(new KeyGesture(Key.Down, ModifierKeys.Control));
 
-				StyleDataGrid();
-
+				
 				_Player = new MusicPlayer();
 
 
 				SetWindowPosition();
-				
+
 				//if (Properties.Settings.Default.Height != 0 && Properties.Settings.Default.Width != 0)
 				//{
 
@@ -90,7 +89,9 @@ namespace Shravan.DJ.TrakSearch
 				//	this.Height = Properties.Settings.Default.Height;
 				//	this.Width = Properties.Settings.Default.Width;
 				//}
-				
+
+
+				StyleDataGrid();
 			}
 			catch (Exception ex)
 			{
@@ -326,6 +327,7 @@ namespace Shravan.DJ.TrakSearch
 
 				UpdateItemSource();
 
+				StyleDataGrid();
 				timer.Stop();
 				var time = timer.ElapsedMilliseconds;
 			}
@@ -356,7 +358,7 @@ namespace Shravan.DJ.TrakSearch
 				}
 				else if (normalColumn.Any(w => c.Header.ToString() == w))
 				{
-					c.MaxWidth = windowSize * 0.06;
+					c.MaxWidth = windowSize * 0.10;
 
 					if (c.Width.DisplayValue > c.MaxWidth)
 					{
@@ -366,7 +368,7 @@ namespace Shravan.DJ.TrakSearch
 				}
 				else if (smallColumn.Any(w => c.Header.ToString() == w))
 				{
-					c.MaxWidth = windowSize * 0.03;
+					c.MaxWidth = windowSize * 0.04;
 
 					if (c.Width.Value > c.MaxWidth)
 						c.Width = new DataGridLength(c.MaxWidth, DataGridLengthUnitType.Star, c.Width.DesiredValue, c.MaxWidth);
@@ -375,6 +377,7 @@ namespace Shravan.DJ.TrakSearch
 				
 				if (c.Header.ToString() == "Comment")
 				{
+					c.MinWidth = windowSize * 0.35;
 					c.Width = windowSize * 0.35;
 				}
 			}

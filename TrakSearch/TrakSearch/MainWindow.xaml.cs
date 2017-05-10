@@ -13,6 +13,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using Shravan.DJ.TrakPlayer;
 using System.Windows.Data;
+using System.Dynamic;
 
 namespace Shravan.DJ.TrakSearch
 {
@@ -21,6 +22,8 @@ namespace Shravan.DJ.TrakSearch
 	/// </summary>
 	public partial class MainWindow : Window
 	{
+		private readonly NLog.Logger logger = LogManager.GetCurrentClassLogger(); // creates a logger using the class name
+
 		TagParser AllTagData = new TagParser();
 		SearchEngineService Search = new SearchEngineService();
 		System.Windows.Threading.DispatcherTimer KeyTimer;
@@ -130,7 +133,7 @@ namespace Shravan.DJ.TrakSearch
 					|| (e.Key == Key.Back || e.Key == Key.Delete)) && Keyboard.Modifiers == ModifierKeys.None )
 				|| ((e.Key == Key.V || e.Key == Key.X) && (Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control) )
 			{
-				//AutoSearchTrigger = true;
+				AutoSearchTrigger = true;
 			}
 			else if (e.Key == Key.Escape)
 			{
@@ -370,24 +373,38 @@ namespace Shravan.DJ.TrakSearch
 
 		private void PlayMusic()
 		{
-			var data = (Id3TagData)MusicData.SelectedItem;
-			var device = MusicPlayer.GetDefaultRenderDevice();
-			if (data != null)
+			try
 			{
-				_Player.Open(data.FullPath, device);
-				_Player.Play();
-				PlayIndicator.IsChecked = true;
+				var data = (Id3TagData)MusicData.SelectedItem;
+				var device = MusicPlayer.GetDefaultRenderDevice();
+				if (data != null)
+				{
+					_Player.Open(data.FullPath, device);
+					_Player.Play();
+					PlayIndicator.IsChecked = true;
+				}
+				else
+				{
+					PlayIndicator.IsChecked = false;
+				}
 			}
-			else
+			catch(Exception ex)
 			{
-				PlayIndicator.IsChecked = false;
+				logger.Error(ex, "Player Error");
 			}
 		}
 		
 		private void StopMusic ()
 		{
-			_Player.Stop();
-			PlayIndicator.IsChecked = false;
+			try
+			{
+				_Player.Stop();
+				PlayIndicator.IsChecked = false;
+			}
+			catch (Exception ex)
+			{
+				logger.Error(ex, "Player Error");
+			}
 		}
 
 		private void PlayerRewind_HotKeyCommand(object sender, ExecutedRoutedEventArgs e)
@@ -467,6 +484,41 @@ namespace Shravan.DJ.TrakSearch
 			_Player.Stop();
 			_Player.Dispose();
 			_Player = null;
+			SaveWindowLocation();
+
+		}
+
+		private void SaveWindowLocation()
+		{
+			dynamic windowData = new ExpandoObject();
+			if (WindowState == WindowState.Maximized)
+			{
+				// Use the RestoreBounds as the current values will be 0, 0 and the size of the screen
+						
+
+				windowData.Top = RestoreBounds.Top;
+				windowData.Left = RestoreBounds.Left;
+				windowData.Height = RestoreBounds.Height;
+				windowData.Width = RestoreBounds.Width;
+				windowData.Maximized = true;
+			}
+			else
+			{
+				windowData.Top = this.Top;
+				windowData.Left = this.Left;
+				windowData = this.Height;
+				windowData = this.Width;
+				windowData = false;
+			}
+
+			JsonConfig.ConfigObject conf = new JsonConfig.ConfigObject();
+
+			dynamic settings = new KeyValuePair<string, object>("WindowPosition", windowData);
+
+			conf.Add(settings);
+
+
+			JsonConfig.Config.SetUserConfig(conf);
 		}
 
 		private void PlayIndicator_Click(object sender, RoutedEventArgs e)

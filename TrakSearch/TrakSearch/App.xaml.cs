@@ -26,6 +26,7 @@ namespace Shravan.DJ.TrakSearch
 			this.DispatcherUnhandledException +=
 			  new DispatcherUnhandledExceptionEventHandler(DispatcherUnhandledExceptionHandler);
 
+			logger.Log(LogLevel.Info, "...Starting App...");
 			base.OnStartup(e);
 		}
 

@@ -22,7 +22,7 @@ namespace Shravan.DJ.TrakSearch
 	/// </summary>
 	public partial class MainWindow : Window
 	{
-		private readonly NLog.Logger logger = LogManager.GetCurrentClassLogger(); // creates a logger using the class name
+		private readonly NLog.Logger logger = NLog.LogManager.GetCurrentClassLogger(); // creates a logger using the class name
 
 		TagParser AllTagData = new TagParser();
 		SearchEngineService Search = new SearchEngineService();
@@ -78,10 +78,22 @@ namespace Shravan.DJ.TrakSearch
 				StyleDataGrid();
 
 				_Player = new MusicPlayer();
+
+
+				
+				//if (Properties.Settings.Default.Height != 0 && Properties.Settings.Default.Width != 0)
+				//{
+
+				//	this.Top = Properties.Settings.Default.Top;
+				//	this.Left = Properties.Settings.Default.Left;
+				//	this.Height = Properties.Settings.Default.Height;
+				//	this.Width = Properties.Settings.Default.Width;
+				//}
+				
 			}
 			catch (Exception ex)
 			{
-				Console.WriteLine(ex.ToString());
+				logger.Error(ex, "Error initalizing window");
 			}
 
 		}
@@ -491,34 +503,19 @@ namespace Shravan.DJ.TrakSearch
 		private void SaveWindowLocation()
 		{
 			dynamic windowData = new ExpandoObject();
-			if (WindowState == WindowState.Maximized)
+			if (WindowState != WindowState.Maximized)
 			{
-				// Use the RestoreBounds as the current values will be 0, 0 and the size of the screen
-						
+				//Properties.Settings.Default.Top = this.Top;
+				//Properties.Settings.Default.Left = this.Left;
+				//Properties.Settings.Default.Height = this.Height;
+				//Properties.Settings.Default.Width = this.Width;
+				//Properties.Settings.Default.Maximized = false;
 
-				windowData.Top = RestoreBounds.Top;
-				windowData.Left = RestoreBounds.Left;
-				windowData.Height = RestoreBounds.Height;
-				windowData.Width = RestoreBounds.Width;
-				windowData.Maximized = true;
-			}
-			else
-			{
-				windowData.Top = this.Top;
-				windowData.Left = this.Left;
-				windowData = this.Height;
-				windowData = this.Width;
-				windowData = false;
+				//Properties.Settings.Default.Save();
 			}
 
-			JsonConfig.ConfigObject conf = new JsonConfig.ConfigObject();
-
-			dynamic settings = new KeyValuePair<string, object>("WindowPosition", windowData);
-
-			conf.Add(settings);
-
-
-			JsonConfig.Config.SetUserConfig(conf);
+			
+			
 		}
 
 		private void PlayIndicator_Click(object sender, RoutedEventArgs e)

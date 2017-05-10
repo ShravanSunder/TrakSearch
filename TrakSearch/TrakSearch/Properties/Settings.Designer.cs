@@ -22,5 +22,5 @@ namespace Shravan.DJ.TrakSearch.Properties {
                 return defaultInstance;
             }
         }
-    }
+	}
 }

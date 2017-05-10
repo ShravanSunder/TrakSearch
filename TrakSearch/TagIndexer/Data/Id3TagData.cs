@@ -115,8 +115,8 @@ namespace Shravan.DJ.TagIndexer.Data
 				Artist = data.Artist;
 				Key = data.Key;
 				Remixer = data.Remixer; //MIXARTIST 
-				Track = data.Track;
-				Year = data.Year;
+				Track = Convert.ToUInt32(data.Track);
+				Year = Convert.ToUInt32(data.Year);
 				Genre = data.Genre;
 				Composers = data.Composers;
 

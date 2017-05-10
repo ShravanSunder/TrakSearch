@@ -105,7 +105,7 @@ namespace Shravan.DJ.TrakSearch
 			var height = SystemParameters.WorkArea.Height / 2;
 
 			this.Top = SystemParameters.WorkArea.Height / 2;
-			this.Left = 0;
+			this.Left = SystemParameters.WorkArea.Left;
 			this.Height = SystemParameters.WorkArea.Height / 2;
 			this.Width = SystemParameters.WorkArea.Width;
 			
@@ -338,9 +338,9 @@ namespace Shravan.DJ.TrakSearch
 		{
 			var dataGrid = MusicData;
 
-			var largeColumn = new List<string> { "Comment", "FullPath" };
-			var smallColumn = new List<string> { "BPM", "Key", "Energy", };
-			var normalColumn = new List<string> { "Title", "Artist", "Album", "Publisher", "Remixer" };
+			var largeColumn = new List<string> { "Comment"};
+			var smallColumn = new List<string> { "BPM", "Key", "Energy", "Year", "Track"};
+			var normalColumn = new List<string> { "Title", "Artist", "Album", "Publisher", "Remixer", "Genre" };
 
 			var windowSize = this.RenderSize.Width > 600 ? this.RenderSize.Width : 600;
 
@@ -349,14 +349,14 @@ namespace Shravan.DJ.TrakSearch
 				var header = c.Header;
 				if (largeColumn.Any(w => c.Header.ToString() == w))
 				{
-					c.MaxWidth = windowSize * 0.4;
+					c.MaxWidth = windowSize * 0.35;
 					if (c.Width.Value > c.MaxWidth)
 						c.Width = new DataGridLength(c.MaxWidth, DataGridLengthUnitType.Star, c.Width.DesiredValue, c.MaxWidth);
 
 				}
 				else if (normalColumn.Any(w => c.Header.ToString() == w))
 				{
-					c.MaxWidth = windowSize * 0.10;
+					c.MaxWidth = windowSize * 0.06;
 
 					if (c.Width.DisplayValue > c.MaxWidth)
 					{
@@ -366,10 +366,16 @@ namespace Shravan.DJ.TrakSearch
 				}
 				else if (smallColumn.Any(w => c.Header.ToString() == w))
 				{
-					c.MaxWidth = windowSize * 0.04;
+					c.MaxWidth = windowSize * 0.03;
 
 					if (c.Width.Value > c.MaxWidth)
 						c.Width = new DataGridLength(c.MaxWidth, DataGridLengthUnitType.Star, c.Width.DesiredValue, c.MaxWidth);
+				}
+
+				
+				if (c.Header.ToString() == "Comment")
+				{
+					c.Width = windowSize * 0.35;
 				}
 			}
 		}

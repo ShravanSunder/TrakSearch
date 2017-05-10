@@ -15,8 +15,21 @@ namespace Shravan.DJ.TagIndexer.Data
 		public int BPM { get; protected set; }
 		public string Comment { get; protected set; }
 		public string Album { get; protected set; }
+		public uint Year { get; protected set; }
+		public uint Track { get; protected set; }
+		/// <summary>
+		/// Label id3
+		/// </summary>
 		public string Publisher { get; protected set; }
+		/// <summary>
+		/// MixArtist id3
+		/// </summary>
 		public string Remixer { get; protected set; }
+		/// <summary>
+		/// First Genre
+		/// </summary>
+		public string Genre  { get; protected set; }
+		public string Composers { get; protected set; }
 
 		public string FullPath { get; protected set; }
 

@@ -16,7 +16,7 @@ namespace Shravan.DJ.TagIndexer.Data
 		/// ExpandoObject
 		/// </summary>
 		protected dynamic _innerData;
-
+		private static List<string> _Fields = null;
 
 		internal dynamic Data { get { return _innerData; } set { value = _innerData; } }
 
@@ -26,16 +26,17 @@ namespace Shravan.DJ.TagIndexer.Data
 
 
 
-		public static List<string> Fields { get; } = new List<string>()
+		public static List<string> Fields
 		{
-			"Title",
-			"Artist",
-			"Comment",
-			"BPM",
-			"Key",
-			"Energy",
-			"Album"
-		};
+			get
+			{
+				if (_Fields == null)
+				{
+					_Fields = typeof(Id3TagDataBase).GetProperties().Select(s => s.Name).ToList();
+				}
+				return _Fields;
+			}
+		}
 		
 
 		public Id3TagData(System.IO.FileInfo file, TagLib.Id3v2.Tag metaData)
@@ -88,9 +89,16 @@ namespace Shravan.DJ.TagIndexer.Data
 					data.Comment = metaData.Comment;
 					data.Artist = metaData.Performers?.FirstOrDefault() ?? "";
 					data.Key = metaData.FirstOrDefault(f => f.FrameId == ByteVector.FromString("TKEY", StringType.UTF8))?.ToString();
+					//Publisher / Label
 					data.Publisher = metaData.FirstOrDefault(f => f.FrameId == ByteVector.FromString("TPUB", StringType.UTF8))?.ToString();
 					data.Publisher = data.Publisher ?? metaData.FirstOrDefault(f => f.FrameId == ByteVector.FromString("TPE2", StringType.UTF8))?.ToString() ?? "";
+					//MIXARTIST 
 					data.Remixer = metaData.FirstOrDefault(f => f.FrameId == ByteVector.FromString("TPE4", StringType.UTF8))?.ToString() ?? "";
+
+					data.Year = metaData.Year;
+					data.Track = metaData.Track;
+					data.Genre = metaData.FirstGenre;
+					data.Composers = metaData.Composers.FirstOrDefault();
 				}
 
 
@@ -105,7 +113,12 @@ namespace Shravan.DJ.TagIndexer.Data
 				//data.Pictures = metaData.Pictures;
 				Artist = data.Artist;
 				Key = data.Key;
-				Remixer = data.Remixer;
+				Remixer = data.Remixer; //MIXARTIST 
+				Track = data.Track;
+				Year = data.Year;
+				Genre = data.Genre;
+				Composers = data.Composers;
+
 
 				_innerData = (IDictionary<string, object>)data;
 			}

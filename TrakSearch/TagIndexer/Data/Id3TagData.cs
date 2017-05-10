@@ -7,11 +7,14 @@ using System.Text;
 using System.Threading.Tasks;
 using TagLib;
 using TagLib.Id3v2;
+using NLog;
 
 namespace Shravan.DJ.TagIndexer.Data
 {
 	public class Id3TagData : Id3TagDataBase
 	{
+		private readonly Logger logger = LogManager.GetCurrentClassLogger(); // creates a logger using the class name
+
 		/// <summary>
 		/// ExpandoObject
 		/// </summary>
@@ -105,9 +108,7 @@ namespace Shravan.DJ.TagIndexer.Data
 				Title = data.Title;
 				Album = data.Album;
 				Energy = data.Energy;
-				int bpm = 0;
-				int.TryParse(data.BPM, out bpm);
-				BPM = bpm;
+				BPM = Convert.ToInt32(data.BPM);
 				Comment = data.Comment;
 				Publisher = data.Publisher;
 				//data.Pictures = metaData.Pictures;
@@ -122,8 +123,10 @@ namespace Shravan.DJ.TagIndexer.Data
 
 				_innerData = (IDictionary<string, object>)data;
 			}
-			catch
+			catch (Exception ex)
 			{
+				logger.Error(ex, "Error opening file" + metaData.ToString()); // which will log the stack trace.
+
 				_innerData = (IDictionary<string, object>)new ExpandoObject();
 			}
 		}

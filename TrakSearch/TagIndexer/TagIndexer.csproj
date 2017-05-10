@@ -55,12 +55,16 @@
     <Reference Include="Lucene.Net.Suggest, Version=4.8.0.770, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\Lucene.Net.Suggest.4.8.0.770-beta\lib\net451\Lucene.Net.Suggest.dll</HintPath>
     </Reference>
+    <Reference Include="NLog, Version=4.0.0.0, Culture=neutral, PublicKeyToken=5120e14c03d0593c, processorArchitecture=MSIL">
+      <HintPath>..\packages\NLog.4.4.9\lib\net45\NLog.dll</HintPath>
+    </Reference>
     <Reference Include="policy.2.0.taglib-sharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=db62eba44689b5b0, processorArchitecture=MSIL">
       <HintPath>..\packages\taglib.2.1.0.0\lib\policy.2.0.taglib-sharp.dll</HintPath>
     </Reference>
     <Reference Include="System" />
-    <Reference Include="System.Collections.Immutable, Version=1.2.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <HintPath>..\packages\System.Collections.Immutable.1.2.0\lib\portable-net45+win8+wp8+wpa81\System.Collections.Immutable.dll</HintPath>
+    <Reference Include="System.Collections.Immutable, Version=1.2.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Collections.Immutable.1.3.1\lib\portable-net45+win8+wp8+wpa81\System.Collections.Immutable.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -76,7 +80,6 @@
   <ItemGroup>
     <Compile Include="Data\Id3TagData.cs" />
     <Compile Include="Data\Id3TagDataBase.cs" />
-    <Compile Include="SearchEngineBase.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SearchEngineService.cs" />
     <Compile Include="TagParser.cs" />

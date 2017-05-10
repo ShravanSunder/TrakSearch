@@ -130,7 +130,7 @@ namespace Shravan.DJ.TrakSearch
 					|| (e.Key == Key.Back || e.Key == Key.Delete)) && Keyboard.Modifiers == ModifierKeys.None )
 				|| ((e.Key == Key.V || e.Key == Key.X) && (Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control) )
 			{
-				AutoSearchTrigger = true;
+				//AutoSearchTrigger = true;
 			}
 			else if (e.Key == Key.Escape)
 			{

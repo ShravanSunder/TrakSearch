@@ -6,6 +6,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Threading;
+using NLog;
 
 namespace Shravan.DJ.TrakSearch
 {
@@ -15,7 +16,7 @@ namespace Shravan.DJ.TrakSearch
 	public partial class App : Application
 	{
 
-		//private readonly Logger logger = LogManager.GetCurrentClassLogger(); // creates a logger using the class name
+		private readonly Logger logger = LogManager.GetCurrentClassLogger(); // creates a logger using the class name
 
 		protected override void OnStartup(StartupEventArgs e)
 		{
@@ -31,6 +32,7 @@ namespace Shravan.DJ.TrakSearch
 		void AppDomainUnhandledExceptionHandler(object sender, UnhandledExceptionEventArgs ea)
 		{
 			Exception e = (Exception)ea.ExceptionObject;
+			logger.Error(e, "Unhandled AppDomainUnhandledExceptionHandler");
 			// log exception
 
 		}
@@ -38,7 +40,7 @@ namespace Shravan.DJ.TrakSearch
 		void DispatcherUnhandledExceptionHandler(object sender, DispatcherUnhandledExceptionEventArgs args)
 		{
 			// and also:
-			//logger.ErrorException("text", args.Exception); // which will log the stack trace.
+			logger.Error(args.Exception, "Unhandled DispatcherUnhandledExceptionHandler"); // which will log the stack trace.
 
 			args.Handled = true;
 			// implement recovery

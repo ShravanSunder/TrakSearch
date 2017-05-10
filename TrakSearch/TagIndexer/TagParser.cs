@@ -13,6 +13,7 @@ using TagLib.Id3v2;
 using TagLib.Mpeg;
 using Tag = TagLib.Id3v2.Tag;
 using System.Collections.Concurrent;
+using NLog;
 
 namespace Shravan.DJ.TagIndexer
 {
@@ -53,7 +54,7 @@ namespace Shravan.DJ.TagIndexer
 
 				var tasks = new List<Task>();
 
-				const int BATCH_SIZE = 25;
+				const int BATCH_SIZE = 25000;
 				int batchCount = 0;
 				while (batchCount < files.Count())
 				{
@@ -109,7 +110,7 @@ namespace Shravan.DJ.TagIndexer
 						{
 							foreach (var tag in tagDataFromIndex)
 							{
-								SearchEngineBase.ClearLuceneIndexRecord(tag);
+								SearchEngineService.ClearLuceneIndexRecord(tag);
 							}
 						}
 

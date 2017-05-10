@@ -1,11 +1,9 @@
 ﻿using Lucene.Net.Analysis.Standard;
 using Lucene.Net.Documents;
 using Lucene.Net.Index;
-using Lucene.Net.QueryParsers;
 using Lucene.Net.QueryParsers.Classic;
 using Lucene.Net.Search;
-using Lucene.Net.Search.Spell;
-using Lucene.Net.Util;
+using Lucene.Net.Store;
 using Shravan.DJ.TagIndexer.Data;
 using System;
 using System.Collections.Generic;
@@ -13,12 +11,17 @@ using System.Dynamic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using static Lucene.Net.Search.BooleanClause;
+using System.IO;
 //using Version = Lucene.Net.Util.Version;
+using NLog;
 
 namespace Shravan.DJ.TagIndexer
 {
-	public class SearchEngineService : SearchEngineBase
+	public class SearchEngineService 
 	{
+
+		private readonly static Logger logger = LogManager.GetCurrentClassLogger(); // creates a logger using the class name
+
 
 		public static List<string> LuceneSpecialCharacters = new List<string>() { "*", "?", "~", "\"", "&&", "||", "!", "^", "!", ":", "{", "}", "!" };
 		//+- && || !( ) {
@@ -40,6 +43,92 @@ namespace Shravan.DJ.TagIndexer
 		}
 
 		public static string CurrentPartition { get; internal set; }
+
+
+
+
+		protected static Lucene.Net.Util.LuceneVersion LUCENE_VER = Lucene.Net.Util.LuceneVersion.LUCENE_48;
+
+		protected static string _luceneDir = System.IO.Path.GetTempPath() + @"\TrakSearch.Lucene.v1\";
+		protected static FSDirectory _directoryTemp;
+		protected static FSDirectory _directory
+		{
+			get
+			{
+				if (_directoryTemp == null) _directoryTemp = FSDirectory.Open(new DirectoryInfo(_luceneDir));
+				if (IndexWriter.IsLocked(_directoryTemp)) IndexWriter.Unlock(_directoryTemp);
+				var lockFilePath = Path.Combine(_luceneDir, "write.lock");
+				if (File.Exists(lockFilePath)) File.Delete(lockFilePath);
+				return _directoryTemp;
+			}
+		}
+
+
+		public static void ClearLuceneIndexRecord(Id3TagData tag)
+		{
+			ClearLuceneIndexRecord(tag.Index);
+		}
+
+		public static void ClearLuceneIndexRecord(string Index)
+		{
+			// init lucene
+			var analyzer = new StandardAnalyzer(LUCENE_VER);
+			using (var writer = new IndexWriter(_directory, new IndexWriterConfig(LUCENE_VER, analyzer)))
+			{
+				// remove older index entry
+				var searchQuery = new TermQuery(new Term("Index", Index));
+				writer.DeleteDocuments(searchQuery);
+
+				// close handles
+				//analyzer.Close();
+				writer.Dispose();
+			}
+		}
+
+		public static bool ClearLuceneIndex()
+		{
+			try
+			{
+				var analyzer = new StandardAnalyzer(LUCENE_VER);
+				using (var writer = new IndexWriter(_directory, new IndexWriterConfig(LUCENE_VER, analyzer)))
+				{
+					// remove older index entries
+					writer.DeleteAll();
+
+					// close handles
+					//analyzer.Close();
+					writer.Dispose();
+				}
+			}
+			catch (System.Exception)
+			{
+				return false;
+			}
+			return true;
+		}
+
+
+		protected static Query ParseQuery(string searchQuery, QueryParser parser)
+		{
+			Query query;
+			try
+			{
+				query = parser.Parse(searchQuery.Trim());
+
+			}
+			catch (ParseException)
+			{
+				try
+				{
+					query = parser.Parse(QueryParser.Escape(searchQuery.Trim()));
+				}
+				catch
+				{
+					query = new BooleanQuery();
+				}
+			}
+			return query;
+		}
 
 		static SearchEngineService()
 		{
@@ -305,35 +394,43 @@ namespace Shravan.DJ.TagIndexer
 
 		private static void PopulateLuceneDoc(Id3TagData id3, Document doc)
 		{
-			doc.Add(new StringField("Index", id3.Index, Field.Store.YES));
-			doc.Add(new StringField("FullPath", id3.FullPath, Field.Store.YES));
-			doc.Add(new StringField("DateModified", DateTools.DateToString(id3.DateModified, DateTools.Resolution.SECOND), Field.Store.YES));
-			foreach (var kv in id3.Data)
+			try
 			{
-				if (kv.Key == "BPM")
-				{
-					int val =  Convert.ToInt32(kv.Value);
-					doc.Add(new IntField(kv.Key, val, Field.Store.YES));
-				}
-				else if (kv.Key == "Commment")
-				{
-					string val = kv.Value as string;
-					string[] comments = val.Split(new[] { '\\', '/' });
 
-					doc.Add(new TextField(kv.Key, val ?? "", Field.Store.YES));
-					doc.Add(new TextField(kv.Key + "_Split", val ?? "", Field.Store.NO));
+				doc.Add(new StringField("Index", id3.Index, Field.Store.YES));
+				doc.Add(new StringField("FullPath", id3.FullPath, Field.Store.YES));
+				doc.Add(new StringField("DateModified", DateTools.DateToString(id3.DateModified, DateTools.Resolution.SECOND), Field.Store.YES));
+				foreach (var kv in id3.Data)
+				{
+					if (kv.Key == "BPM")
+					{
+						int val = Convert.ToInt32(kv.Value);
+						doc.Add(new IntField(kv.Key, val, Field.Store.YES));
+					}
+					else if (kv.Key == "Commment")
+					{
+						string val = kv.Value as string;
+						string[] comments = val.Split(new[] { '\\', '/' });
 
+						doc.Add(new TextField(kv.Key, val ?? "", Field.Store.YES));
+						doc.Add(new TextField(kv.Key + "_Split", val ?? "", Field.Store.NO));
+
+					}
+					else if ((kv?.Value?.GetType() == typeof(int) || kv?.Value?.GetType() == typeof(uint)))
+					{
+						int val = Convert.ToInt32(kv.Value);
+						doc.Add(new IntField(kv.Key, val, Field.Store.YES));
+					}
+					else
+					{
+						var val = kv.Value as string;
+						doc.Add(new TextField(kv.Key, val ?? "", Field.Store.YES));
+					}
 				}
-				else if (kv.Value.GetType == typeof(int) || kv.Value.GetType == typeof(uint))
-				{
-					int val = Convert.ToInt32(kv.Value);
-					doc.Add(new IntField(kv.Key, val, Field.Store.YES));
-				}
-				else
-				{
-					var val = kv.Value as string;
-					doc.Add(new TextField(kv.Key, val ?? "", Field.Store.YES));
-				}
+			}
+			catch(Exception ex)
+			{
+				logger.Error(ex, "Failed to add to Lucene Index");
 			}
 		}
 		
@@ -431,6 +528,8 @@ namespace Shravan.DJ.TagIndexer
 			return results;
 			
 		}
+
+
 		#region LuceneMapping
 
 
@@ -489,6 +588,7 @@ namespace Shravan.DJ.TagIndexer
 			////searcher.Dispose();
 			//return MapLuceneToDataList(docs);
 		}
+
 
 		#endregion
 

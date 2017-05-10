@@ -80,6 +80,7 @@ namespace Shravan.DJ.TrakSearch
 				_Player = new MusicPlayer();
 
 
+				SetWindowPosition();
 				
 				//if (Properties.Settings.Default.Height != 0 && Properties.Settings.Default.Width != 0)
 				//{
@@ -96,6 +97,18 @@ namespace Shravan.DJ.TrakSearch
 				logger.Error(ex, "Error initalizing window");
 			}
 
+		}
+
+		private void SetWindowPosition()
+		{
+
+			var height = SystemParameters.WorkArea.Height / 2;
+
+			this.Top = SystemParameters.WorkArea.Height / 2;
+			this.Left = 0;
+			this.Height = SystemParameters.WorkArea.Height / 2;
+			this.Width = SystemParameters.WorkArea.Width;
+			
 		}
 
 		private void Event_KeyTimerTick(object sender, EventArgs e)

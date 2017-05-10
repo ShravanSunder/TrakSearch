@@ -22,6 +22,7 @@ namespace Shravan.DJ.TagIndexer
 		public ConcurrentBag<Id3TagData> TagList;
 		protected ConcurrentBag<Id3TagData> LuceneUpdates;
 
+		const int BATCH_SIZE = 100;
 
 		public TagParser()
 		{
@@ -54,7 +55,7 @@ namespace Shravan.DJ.TagIndexer
 
 				var tasks = new List<Task>();
 
-				const int BATCH_SIZE = 25000;
+				
 				int batchCount = 0;
 				while (batchCount < files.Count())
 				{

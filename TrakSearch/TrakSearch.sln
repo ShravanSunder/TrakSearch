@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TagIndexer", "TagIndexer\Ta
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TrakPlayer", "TrakPlayer\TrakPlayer.csproj", "{45BB0021-C871-40C6-88C6-8AE1171CC66A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DJ.Utilities", "DJ.Utilities\DJ.Utilities.csproj", "{8328CD1F-CEDD-4D6A-940F-65B1EB6F079D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{45BB0021-C871-40C6-88C6-8AE1171CC66A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{45BB0021-C871-40C6-88C6-8AE1171CC66A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{45BB0021-C871-40C6-88C6-8AE1171CC66A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8328CD1F-CEDD-4D6A-940F-65B1EB6F079D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8328CD1F-CEDD-4D6A-940F-65B1EB6F079D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8328CD1F-CEDD-4D6A-940F-65B1EB6F079D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8328CD1F-CEDD-4D6A-940F-65B1EB6F079D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

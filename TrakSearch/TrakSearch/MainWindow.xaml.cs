@@ -292,7 +292,10 @@ namespace Shravan.DJ.TrakSearch
 		private void MusicData_MouseDoubleClick(object sender, MouseButtonEventArgs e)
 		{
 			var data = (Id3TagData)MusicData.SelectedItem;
-			Clipboard.SetData(DataFormats.Text, data.Title ?? "" + "  " + data.Artist ?? "");
+			var text = data.Title ?? "";
+			text += "  " + data.Artist ?? "";
+
+			Clipboard.SetData(DataFormats.Text, text);
 		}
 
 		private void FolderButton_Click(object sender, RoutedEventArgs e)

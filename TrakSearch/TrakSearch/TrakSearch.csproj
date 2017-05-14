@@ -27,7 +27,7 @@
     <ProductName>DJ Trak Search</ProductName>
     <PublisherName>Shravan</PublisherName>
     <OpenBrowserOnPublish>false</OpenBrowserOnPublish>
-    <ApplicationRevision>7</ApplicationRevision>
+    <ApplicationRevision>8</ApplicationRevision>
     <ApplicationVersion>2.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
@@ -159,6 +159,10 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\DJ.Utilities\DJ.Utilities.csproj">
+      <Project>{8328cd1f-cedd-4d6a-940f-65b1eb6f079d}</Project>
+      <Name>DJ.Utilities</Name>
+    </ProjectReference>
     <ProjectReference Include="..\TagIndexer\TagIndexer.csproj">
       <Project>{0cb15dc5-eff8-46a2-9578-a814f1053410}</Project>
       <Name>TagIndexer</Name>

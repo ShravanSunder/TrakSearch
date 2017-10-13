@@ -17,7 +17,7 @@ using NLog;
 
 namespace Shravan.DJ.TagIndexer
 {
-	public class SearchEngineService 
+	public class SearchEngineService
 	{
 
 		private readonly static Logger logger = LogManager.GetCurrentClassLogger(); // creates a logger using the class name
@@ -132,7 +132,7 @@ namespace Shravan.DJ.TagIndexer
 
 		static SearchEngineService()
 		{
-			
+
 		}
 
 
@@ -143,7 +143,7 @@ namespace Shravan.DJ.TagIndexer
 
 			var bracketKeys = new List<string>() { "(", ")", "\\(\\)" };
 			var logicalKeys = new List<string>() { "+", "-" };
-			
+
 			//var removeKeys = new List<string>() { "AND", "OR", "NOT" };
 			LuceneSpecialCharacters.AddRange(logicalKeys);
 			LuceneSpecialCharacters.AddRange(bracketKeys);
@@ -168,7 +168,7 @@ namespace Shravan.DJ.TagIndexer
 			{
 				CreateQueryWithWildCard(LuceneSpecialCharacters, searchTerm, query);
 			}
-						
+
 			CreateKeyQueries(specialTerms, query);
 			CreateBpmQueries(specialTerms, query);
 
@@ -278,9 +278,9 @@ namespace Shravan.DJ.TagIndexer
 
 
 
-			foreach (var bpm in bpmTerms.Where(b => b > 0 && b < 200))
+			foreach (var bpm in bpmTerms.Where(b => b > 0 && b < 220))
 			{
-				query.Add(CreateQueryInt("BPM", bpm, 0.10), Occur.MUST);
+				query.Add(CreateQueryInt("BPM", bpm, 0.11), Occur.MUST);
 			}
 
 			return bpmInputs;
@@ -293,7 +293,7 @@ namespace Shravan.DJ.TagIndexer
 			{
 				try
 				{
-					
+
 					var numStr = Regex.Replace(key, "[^0-9]", "");
 					var num = int.Parse(numStr);
 					var letter = Regex.Replace(key, "[^dDmM]", "");
@@ -405,7 +405,7 @@ namespace Shravan.DJ.TagIndexer
 					if (kv.Key == "BPM")
 					{
 						int val = Convert.ToInt32(kv.Value);
-						doc.Add(new IntField(kv.Key, val, Field.Store.YES));
+						doc.Add(new Int32Field(kv.Key, val, Field.Store.YES));
 					}
 					else if (kv.Key == "Commment")
 					{
@@ -419,7 +419,7 @@ namespace Shravan.DJ.TagIndexer
 					else if ((kv?.Value?.GetType() == typeof(int) || kv?.Value?.GetType() == typeof(uint)))
 					{
 						int val = Convert.ToInt32(kv.Value);
-						doc.Add(new IntField(kv.Key, val, Field.Store.YES));
+						doc.Add(new Int32Field(kv.Key, val, Field.Store.YES));
 					}
 					else
 					{
@@ -433,7 +433,7 @@ namespace Shravan.DJ.TagIndexer
 				logger.Error(ex, "Failed to add to Lucene Index");
 			}
 		}
-		
+
 
 		public static void AddOrUpdateLuceneIndex(IEnumerable<Id3TagData> tagList)
 		{
@@ -462,7 +462,7 @@ namespace Shravan.DJ.TagIndexer
 
 			if (!string.IsNullOrEmpty(searchField))
 			{
-				var query = NumericRangeQuery.NewIntRange(searchField, min, max, true, true);
+				var query = NumericRangeQuery.NewInt32Range(searchField, min, max, true, true);
 
 				return query;
 			}
@@ -484,7 +484,7 @@ namespace Shravan.DJ.TagIndexer
 			// search by single field
 			if (!string.IsNullOrEmpty(searchField))
 			{
-				
+
 				var query = new TermQuery(new Term(searchField, searchQuery));
 				return query;
 			}
@@ -493,7 +493,7 @@ namespace Shravan.DJ.TagIndexer
 				// search by multiple fields (ordered by RELEVANCE)
 				var parser = new MultiFieldQueryParser
 					 (LUCENE_VER, Id3TagData.Fields.ToArray(), analyzer);
-				parser.DefaultOperator = QueryParser.Operator.AND;
+				parser.DefaultOperator = QueryParser.AND_OPERATOR;
 				var query = ParseQuery(searchQuery, parser);
 
 				return query;
@@ -506,12 +506,12 @@ namespace Shravan.DJ.TagIndexer
 			var analyzer = new StandardAnalyzer(LUCENE_VER, Lucene.Net.Analysis.Util.CharArraySet.EMPTY_SET);
 
 			var query = new TermQuery(new Term("Index", Index));
-			
+
 			var hits = Searcher.Search(query, 10).ScoreDocs;
 			var results = MapLuceneToDataList(hits, Searcher);
 
 			return results;
-			
+
 		}
 
 		private static IEnumerable<Id3TagData> SearchInternal(Query query)
@@ -526,7 +526,7 @@ namespace Shravan.DJ.TagIndexer
 			//analyzer.Close();
 			//searcher.Dispose();
 			return results;
-			
+
 		}
 
 
@@ -539,7 +539,7 @@ namespace Shravan.DJ.TagIndexer
 			IDictionary<string, object> dic = new ExpandoObject();
 			foreach (var field in doc)
 			{
-				dic.Add(field.Name, field.StringValue);
+				dic.Add(field.Name, field.GetStringValue());
 			}
 
 			return new Id3TagData(fullPath, dic);
@@ -576,13 +576,13 @@ namespace Shravan.DJ.TagIndexer
 			throw new NotImplementedException();
 			//var reader = DirectoryReader.Open(_directory);
 			//reader.MaxDoc;
-				
+
 			//var searcher = new IndexSearcher(reader);
 			//MultiFields.GetFields(reader);
 
 			//var docs = new List<Document>();
 			//var term = reader
-				
+
 			//while (term.Next()) docs.Add(searcher.Doc(term.Doc));
 			////reader.Dispose();
 			////searcher.Dispose();

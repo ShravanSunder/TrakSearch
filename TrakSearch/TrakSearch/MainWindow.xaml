@@ -12,7 +12,7 @@
         SizeChanged="Window_SizeChanged"
         PreviewKeyDown="Window_PreviewKeyDown"
         Closing="Window_Closing">
-    
+
     <Window.Resources>
         <SolidColorBrush x:Key="LightBlack" Color="#282828" />
     </Window.Resources>
@@ -27,6 +27,8 @@
         <DockPanel HorizontalAlignment="Stretch" Margin="1,1,1,1" VerticalAlignment="Stretch">
             <DockPanel DockPanel.Dock="Top">
                  <StackPanel Orientation="Horizontal" DockPanel.Dock="Left">
+
+                    <Image Name="Waveform" Height="20" Width="200"></Image>
                     <ToggleButton Name="PlayIndicator" ToolTip="CTRL-Up to Play, CTRL-Down to Stop, CTRL-Left/Right to seek"
                                   Click="PlayIndicator_Click" Padding="6,2,6,2" >
                         <ToggleButton.Style>
@@ -57,25 +59,23 @@
                                             <StopStoryboard BeginStoryboardName="PlayStoryboard"></StopStoryboard>
                                         </Trigger.EnterActions>
                                     </Trigger>
-                                    
+
                                 </Style.Triggers>
-                                
+
                             </Style>
                         </ToggleButton.Style>
                     </ToggleButton>
-                     
-                     
                     <Label>BPM</Label>
-                    <TextBox Name="BpmSearchBox" 
-                             KeyUp="SearchBox_KeyUp" PreviewTextInput="NumberSearchBox_PreviewTextInput" 
+                    <TextBox Name="BpmSearchBox"
+                             KeyUp="SearchBox_KeyUp" PreviewTextInput="NumberSearchBox_PreviewTextInput"
                              FontSize="14" DockPanel.Dock="Left" Width="33" MaxLength="3" TabIndex="1"></TextBox>
                     <Label>Key</Label>
-                    <TextBox Name="KeySearchBox" 
-                             KeyUp="SearchBox_KeyUp" PreviewTextInput="KeySearchBox_PreviewTextInput" 
+                    <TextBox Name="KeySearchBox"
+                             KeyUp="SearchBox_KeyUp" PreviewTextInput="KeySearchBox_PreviewTextInput"
                              FontSize="14" DockPanel.Dock="Left" Width="33" MaxLength="3" TabIndex="2"></TextBox>
                     <Label>Energy</Label>
-                    <TextBox Name="EnergySearchBox" 
-                             KeyUp="SearchBox_KeyUp" PreviewTextInput="NumberSearchBox_PreviewTextInput"  
+                    <TextBox Name="EnergySearchBox"
+                             KeyUp="SearchBox_KeyUp" PreviewTextInput="NumberSearchBox_PreviewTextInput"
                              FontSize="14" DockPanel.Dock="Left" Width="33" MaxLength="1" TabIndex="3"></TextBox>
                 </StackPanel>
                 <StackPanel Orientation="Horizontal" DockPanel.Dock="Right">
@@ -95,7 +95,7 @@
                 <TextBox Name="SearchBox" KeyUp="SearchBox_KeyUp" FontSize="14"  TabIndex="4" ></TextBox>
             </DockPanel>
             <Grid>
-                <DataGrid Name="MusicData" MouseDoubleClick="MusicData_MouseDoubleClick" 
+                <DataGrid Name="MusicData" MouseDoubleClick="MusicData_MouseDoubleClick"
                           AlternatingRowBackground="{StaticResource LightBlack}" FontSize="12"
                           SelectionMode="Single"
                           EnableColumnVirtualization="True"  EnableRowVirtualization ="True"

@@ -28,7 +28,7 @@
             <DockPanel DockPanel.Dock="Top">
                  <StackPanel Orientation="Horizontal" DockPanel.Dock="Left">
 
-                    <Image Name="Waveform" Height="20" Width="200"></Image>
+                    <Image Name="Waveform" Height="20" Width="200" IsEnabled="False" Visibility="Collapsed"></Image>
                     <ToggleButton Name="PlayIndicator" ToolTip="CTRL-Up to Play, CTRL-Down to Stop, CTRL-Left/Right to seek"
                                   Click="PlayIndicator_Click" Padding="6,2,6,2" >
                         <ToggleButton.Style>

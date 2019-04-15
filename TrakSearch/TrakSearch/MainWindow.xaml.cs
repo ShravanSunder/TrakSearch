@@ -32,7 +32,7 @@ namespace Shravan.DJ.TrakSearch
         Stopwatch WindowTimer = new Stopwatch();
         bool Searching = false;
 
-        protected WaveformRenderer waveRenderer = new WaveformRenderer();
+        //protected WaveformRenderer waveRenderer = new WaveformRenderer();
 
         public static RoutedCommand SearchHotkey = new RoutedCommand();
         public static RoutedCommand PlayerPlayHotkey = new RoutedCommand();
@@ -298,6 +298,7 @@ namespace Shravan.DJ.TrakSearch
             var data = (Id3TagData)MusicData.SelectedItem;
             var text = data.Title ?? "";
             text += "  " + data.Artist ?? "";
+            text = GetAlphaNumericOnly(text);
 
             Clipboard.SetData(DataFormats.Text, text);
         }
@@ -331,6 +332,12 @@ namespace Shravan.DJ.TrakSearch
                 this.MusicData.ItemsSource = AllTagData.TagList.Cast<Id3TagDataBase>();
                 this.MusicData.Items.Refresh();
                 this.ResultCountLabel.Content = AllTagData.TagList.Count();
+
+                var bpmSort = MusicData.Columns.FirstOrDefault(w => w.Header.ToString() == "BPM");
+                if (bpmSort != null)
+                {
+                    _MusicDataSortColumn = bpmSort;
+                }
 
                 UpdateItemSource();
 
@@ -501,6 +508,13 @@ namespace Shravan.DJ.TrakSearch
             return !regex.IsMatch(text);
         }
 
+        private static string GetAlphaNumericOnly(string text)
+        {
+            //alpha numeric with space
+            Regex regex = new Regex(@"/^[\w\-\s]+$/"); //regex that matches disallowed text
+            return regex.Replace(text, "");
+        }
+
 
         private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
         {
@@ -591,7 +605,7 @@ namespace Shravan.DJ.TrakSearch
 
         public void Dispose()
         {
-            waveRenderer.Dispose();
+            //waveRenderer.Dispose();
         }
     }
 }

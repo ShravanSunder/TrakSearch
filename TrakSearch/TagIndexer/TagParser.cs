@@ -55,7 +55,7 @@ namespace Shravan.DJ.TagIndexer
 
 				var tasks = new List<Task>();
 
-				
+
 				int batchCount = 0;
 				while (batchCount < files.Count())
 				{
@@ -89,14 +89,14 @@ namespace Shravan.DJ.TagIndexer
 
 			foreach (var file in batch)
 			{
-				IndexFiles(file, updateIndex);
+				IndexFile(file, updateIndex);
 			}
 
 			foreach (var t in updateIndex)
 				LuceneUpdates.Add(t);
 		}
 
-		public void IndexFiles(FileInfo fileInfo, List<Id3TagData> updateIndex)
+		public void IndexFile(FileInfo fileInfo, List<Id3TagData> updateIndex)
 		{
 			{
 				try

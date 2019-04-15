@@ -40,7 +40,7 @@ namespace DJ.Utilities
                 waveSource =
                     CodecFactory.Instance.GetCodec(fullPath)
                     //.ChangeSampleRate(1000)
-                    .ChangeSampleRate(11025)
+                    //.ChangeSampleRate(11025)
                     //.ToMono()
                     .ToSampleSource();
 
@@ -90,6 +90,7 @@ namespace DJ.Utilities
             {
                 g.Clear(Color.DarkSlateGray);
                 Pen pen = new Pen(Color.OrangeRed);
+
                 int size = data.Length;
                 for (int iPixel = 0; iPixel < width; iPixel++)
                 {
@@ -105,7 +106,18 @@ namespace DJ.Utilities
                         max = val > max ? val : max;
                     }
                     int yMax = BORDER_WIDTH + height - (int)((max + 1) * .5 * height);
+                    yMax += 5;
                     int yMin = BORDER_WIDTH + height - (int)((min + 1) * .5 * height);
+
+                    if (Math.Abs(data[iPixel]) < 0.1)
+                    {
+                        pen.Color = Color.Red;
+                    }
+                    else
+                    {
+
+                    }
+
                     g.DrawLine(pen, iPixel + BORDER_WIDTH, yMax,
                         iPixel + BORDER_WIDTH, yMin);
                 }

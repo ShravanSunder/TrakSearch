@@ -29,7 +29,7 @@ namespace Shravan.DJ.TagIndexer.Data
 		/// First Genre
 		/// </summary>
 		public string Genre  { get; protected set; }
-		public string Composers { get; protected set; }
+		//public string Composers { get; protected set; }
 
 		public string FullPath { get; protected set; }
         public string Index { get; internal set; }

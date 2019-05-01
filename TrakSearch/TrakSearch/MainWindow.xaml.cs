@@ -49,8 +49,8 @@ namespace Shravan.DJ.TrakSearch
 
         MusicPlayer _Player;
 
-
         public bool AutoSearchTrigger { get; private set; }
+        public int SearchKeyCounterForDebounce { get; private set; }
 
         public MainWindow()
         {
@@ -65,7 +65,7 @@ namespace Shravan.DJ.TrakSearch
                 this.MusicData.Items.Refresh();
 
                 KeyTimer = new System.Windows.Threading.DispatcherTimer();
-                KeyTimer.Interval = new TimeSpan(0, 0, 0, 0, 333);
+                KeyTimer.Interval = new TimeSpan(0, 0, 0, 0, 200);
                 KeyTimer.Tick += new EventHandler(Event_KeyTimerTick);
                 KeyTimer.Start();
 
@@ -127,6 +127,11 @@ namespace Shravan.DJ.TrakSearch
             if (Searching)
                 return;
 
+            if (SearchKeyCounterForDebounce > 0)
+            {
+                SearchKeyCounterForDebounce = 0;
+                return;
+            }
 
             if (!(string.IsNullOrEmpty(SearchBox.Text.Trim())
                     && string.IsNullOrEmpty(BpmSearchBox.Text.Trim())
@@ -167,8 +172,9 @@ namespace Shravan.DJ.TrakSearch
                 || ((e.Key == Key.V || e.Key == Key.X) && (Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control))
             {
                 AutoSearchTrigger = true;
+                SearchKeyCounterForDebounce++;
             }
-            else    if (e.Key == Key.Escape)
+            else if (e.Key == Key.Escape)
             {
                 AutoSearchTrigger = false;
                 ClearSearch();

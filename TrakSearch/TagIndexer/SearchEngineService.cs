@@ -403,16 +403,16 @@ namespace Shravan.DJ.TagIndexer
 
                 AddDocProperties(doc, "BPM", id3.BPM);
                 AddDocProperties(doc, "Comment", id3.Comment);
-                AddDocProperties(doc, null, id3.Artist);
-                AddDocProperties(doc, null, id3.Title);
-                AddDocProperties(doc, null, id3.Publisher);
-                AddDocProperties(doc, null, id3.Year);
-                AddDocProperties(doc, null, id3.Genre);
-                AddDocProperties(doc, null, id3.Energy);
-                AddDocProperties(doc, null, id3.Album);
-                AddDocProperties(doc, null, id3.Track);
-                AddDocProperties(doc, null, id3.Remixer);
-                AddDocProperties(doc, null, id3.Composers);
+                AddDocProperties(doc, "Artist", id3.Artist);
+                AddDocProperties(doc, "Title", id3.Title);
+                AddDocProperties(doc, "Publisher", id3.Publisher);
+                AddDocProperties(doc, "Year", id3.Year);
+                AddDocProperties(doc, "Key", id3.Key);
+                AddDocProperties(doc, "Genre", id3.Genre);
+                AddDocProperties(doc, "Energy", id3.Energy);
+                AddDocProperties(doc, "Album", id3.Album);
+                AddDocProperties(doc, "Track", id3.Track);
+                AddDocProperties(doc, "Remixer", id3.Remixer);
 
             }
 			catch(Exception ex)
@@ -436,7 +436,7 @@ namespace Shravan.DJ.TagIndexer
                 doc.Add(new TextField(key, val ?? "", Field.Store.YES));
                 doc.Add(new TextField(key + "_Split", val ?? "", Field.Store.NO));
             }
-            else if (value is uint)
+            else if (value is uint || value is int)
             {
                 var val = Convert.ToInt32(value);
                 doc.Add(new Int32Field(key, val, Field.Store.YES));

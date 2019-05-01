@@ -112,7 +112,7 @@ namespace Shravan.DJ.TagIndexer.Data
 				Track = Convert.ToUInt32(data.Track);
 				Year = Convert.ToUInt32(data.Year);
 				Genre = data.Genre;
-				Composers = data.Composers;
+				//Composers = data.Composers;
 			}
 			catch (Exception ex)
 			{

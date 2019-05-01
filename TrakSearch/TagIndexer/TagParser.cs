@@ -123,8 +123,6 @@ namespace Shravan.DJ.TagIndexer
 							updateIndex.Add(tagDataFromFile);
 						}
 
-
-
 					}
 					else if (tagDataFromIndex.Count() == 1)
 					{

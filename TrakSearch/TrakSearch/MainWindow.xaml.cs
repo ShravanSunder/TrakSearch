@@ -16,6 +16,7 @@ using System.Windows.Data;
 using System.Dynamic;
 using System.Windows.Media.Imaging;
 using DJ.Utilities;
+using System.Collections.ObjectModel;
 
 namespace Shravan.DJ.TrakSearch
 {
@@ -27,10 +28,11 @@ namespace Shravan.DJ.TrakSearch
         private readonly NLog.Logger logger = NLog.LogManager.GetCurrentClassLogger(); // creates a logger using the class name
 
         TagParser AllTagData = new TagParser();
-        SearchEngineService Search = new SearchEngineService();
+        SearchEngineService SearchEngine = new SearchEngineService();
         System.Windows.Threading.DispatcherTimer KeyTimer;
         Stopwatch WindowTimer = new Stopwatch();
         bool Searching = false;
+        ObservableCollection<Id3TagData> Playlist = new ObservableCollection<Id3TagData>();
 
         //protected WaveformRenderer waveRenderer = new WaveformRenderer();
 
@@ -39,6 +41,8 @@ namespace Shravan.DJ.TrakSearch
         public static RoutedCommand PlayerRewindHotkey = new RoutedCommand();
         public static RoutedCommand PlayerForwardHotkey = new RoutedCommand();
         public static RoutedCommand PlayerStopHotkey = new RoutedCommand();
+        public static RoutedCommand PlaylistAddHotkey = new RoutedCommand();
+        public static RoutedCommand PlaylistToggleHotkey = new RoutedCommand();
 
         Mutex SearchingMutex = new Mutex();
         DataGridColumn _MusicDataSortColumn;
@@ -67,7 +71,6 @@ namespace Shravan.DJ.TrakSearch
 
                 WindowTimer.Start();
 
-
                 SearchHotkey.InputGestures.Add(new KeyGesture(Key.F, ModifierKeys.Control));
                 //HotKeyCommands.InputGestures.Add(new KeyGesture(Key.D1, ModifierKeys.Alt));
                 //HotKeyCommands.InputGestures.Add(new KeyGesture(Key.D2, ModifierKeys.Alt));
@@ -79,27 +82,27 @@ namespace Shravan.DJ.TrakSearch
                 PlayerForwardHotkey.InputGestures.Add(new KeyGesture(Key.Right, ModifierKeys.Control));
                 PlayerStopHotkey.InputGestures.Add(new KeyGesture(Key.Down, ModifierKeys.Control));
 
+                PlaylistToggleHotkey.InputGestures.Add(new KeyGesture(Key.A, ModifierKeys.Control));
+                PlaylistAddHotkey.InputGestures.Add(new KeyGesture(Key.Z, ModifierKeys.Control));
 
                 _Player = new MusicPlayer();
 
-
                 SetWindowPosition();
-
-                //if (Properties.Settings.Default.Height != 0 && Properties.Settings.Default.Width != 0)
-                //{
-
-                //	this.Top = Properties.Settings.Default.Top;
-                //	this.Left = Properties.Settings.Default.Left;
-                //	this.Height = Properties.Settings.Default.Height;
-                //	this.Width = Properties.Settings.Default.Width;
-                //}
-
 
                 StyleDataGrid();
             }
             catch (Exception ex)
             {
                 logger.Error(ex, "Error initalizing window");
+            }
+
+            try
+            {
+                this.PlaylistData.ItemsSource = Playlist;
+            }
+            catch(Exception ex)
+            {
+                logger.Error(ex, "Error initializing playlist");
             }
 
         }
@@ -165,7 +168,7 @@ namespace Shravan.DJ.TrakSearch
             {
                 AutoSearchTrigger = true;
             }
-            else if (e.Key == Key.Escape)
+            else    if (e.Key == Key.Escape)
             {
                 AutoSearchTrigger = false;
                 ClearSearch();
@@ -486,6 +489,20 @@ namespace Shravan.DJ.TrakSearch
             StopMusic();
         }
 
+        private void PlaylistAdd_HotKeyCommand(object sender, ExecutedRoutedEventArgs e)
+        {
+            var data = (Id3TagData)MusicData.SelectedItem;
+            if (data != null && !string.IsNullOrEmpty(data.Artist) && !string.IsNullOrEmpty(data.Title)
+                && !Playlist.Any(p => p.FullPath == data.FullPath))
+            {
+                this.Dispatcher.Invoke(() =>
+                {
+                    Playlist.Add(data);
+                });
+            }
+        }
+
+
         private void NumberSearchBox_PreviewTextInput(object sender, TextCompositionEventArgs e)
         {
             e.Handled = !NumbersOnly(e.Text);
@@ -606,6 +623,42 @@ namespace Shravan.DJ.TrakSearch
         public void Dispose()
         {
             //waveRenderer.Dispose();
+        }
+
+        private void PlaylistToggle_Click(object sender, RoutedEventArgs e)
+        {
+            if (PlaylistData.Visibility == Visibility.Collapsed)
+                PlaylistData.Visibility = Visibility.Visible;
+            else
+                PlaylistData.Visibility = Visibility.Collapsed;
+        }
+
+        private void Playlist_AutoGeneratingColumn(object sender, DataGridAutoGeneratingColumnEventArgs e)
+        {
+            var allow = new List<string> { "Title", "Artist", "Energy", "Key", "BPM", "Comment"};
+
+            if (!allow.Contains(e.Column.Header as string))
+            {
+                e.Cancel = true;
+            }
+            else
+            {
+                if (e.Column.Header.ToString() == "Comment")
+                {
+                    e.Column.MaxWidth = 400;
+                    e.Column.Width = 400;
+                }
+                else if (e.Column.Header.ToString() == "Artist" || e.Column.Header.ToString() == "Title")
+                {
+                    e.Column.Width = 100;
+                    e.Column.MaxWidth = 100;
+                }
+                else
+                {
+                    e.Column.MaxWidth = 100;
+                }
+
+            }
         }
     }
 }

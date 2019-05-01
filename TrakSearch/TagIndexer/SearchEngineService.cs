@@ -49,7 +49,7 @@ namespace Shravan.DJ.TagIndexer
 
 		protected static Lucene.Net.Util.LuceneVersion LUCENE_VER = Lucene.Net.Util.LuceneVersion.LUCENE_48;
 
-		protected static string _luceneDir = System.IO.Path.GetTempPath() + @"\TrakSearch.Lucene.v1\";
+		protected static string _luceneDir = System.IO.Path.GetTempPath() + @"\TrakSearch.Lucene.v1." + Environment.UserName.Replace(" ",".");
 		protected static FSDirectory _directoryTemp;
 		protected static FSDirectory _directory
 		{
@@ -377,7 +377,7 @@ namespace Shravan.DJ.TagIndexer
 
 		}
 
-			private static void AddOrUpdateLuceneIndex(Id3TagData id3, IndexWriter writer)
+		private static void AddOrUpdateLuceneIndex(Id3TagData id3, IndexWriter writer)
 		{
 			// remove older index entry
 

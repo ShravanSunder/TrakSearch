@@ -13,20 +13,14 @@ namespace Shravan.DJ.TagIndexer.Data
 {
 	public class Id3TagData : Id3TagDataBase
 	{
-		private readonly Logger logger = LogManager.GetCurrentClassLogger(); // creates a logger using the class name
-
 		/// <summary>
 		/// ExpandoObject
 		/// </summary>
 		protected dynamic _innerData;
 		private static List<string> _Fields = null;
 
-		internal dynamic Data { get { return _innerData; } set { value = _innerData; } }
-
-		internal string Index { get; set; }
 		internal DateTime DateModified { get; set; }
 		internal bool MarkPurgeRecord { get; set; }
-
 
 
 		public static List<string> Fields
@@ -40,7 +34,7 @@ namespace Shravan.DJ.TagIndexer.Data
 				return _Fields;
 			}
 		}
-		
+
 
 		public Id3TagData(System.IO.FileInfo file, TagLib.Id3v2.Tag metaData)
 		{
@@ -95,7 +89,7 @@ namespace Shravan.DJ.TagIndexer.Data
 					//Publisher / Label
 					data.Publisher = metaData.FirstOrDefault(f => f.FrameId == ByteVector.FromString("TPUB", StringType.UTF8))?.ToString();
 					data.Publisher = data.Publisher ?? metaData.FirstOrDefault(f => f.FrameId == ByteVector.FromString("TPE2", StringType.UTF8))?.ToString() ?? "";
-					//MIXARTIST 
+					//MIXARTIST
 					data.Remixer = metaData.FirstOrDefault(f => f.FrameId == ByteVector.FromString("TPE4", StringType.UTF8))?.ToString() ?? "";
 
 					data.Year = metaData.Year;
@@ -114,20 +108,14 @@ namespace Shravan.DJ.TagIndexer.Data
 				//data.Pictures = metaData.Pictures;
 				Artist = data.Artist;
 				Key = data.Key;
-				Remixer = data.Remixer; //MIXARTIST 
+				Remixer = data.Remixer; //MIXARTIST
 				Track = Convert.ToUInt32(data.Track);
 				Year = Convert.ToUInt32(data.Year);
 				Genre = data.Genre;
 				Composers = data.Composers;
-
-
-				_innerData = (IDictionary<string, object>)data;
 			}
 			catch (Exception ex)
 			{
-				logger.Error(ex, "Error opening file" + metaData.ToString()); // which will log the stack trace.
-
-				_innerData = (IDictionary<string, object>)new ExpandoObject();
 			}
 		}
 

@@ -49,7 +49,7 @@ namespace Shravan.DJ.TagIndexer
 
 		protected static Lucene.Net.Util.LuceneVersion LUCENE_VER = Lucene.Net.Util.LuceneVersion.LUCENE_48;
 
-		protected static string _luceneDir = System.IO.Path.GetTempPath() + @"\TrakSearch.Lucene.v1." + Environment.UserName.Replace(" ",".");
+		protected static string _luceneDir = System.IO.Path.GetTempPath() + @"\TrakSearch.Lucene.v2." + Environment.UserName.Replace(" ",".");
 		protected static FSDirectory _directoryTemp;
 		protected static FSDirectory _directory
 		{
@@ -400,42 +400,55 @@ namespace Shravan.DJ.TagIndexer
 				doc.Add(new StringField("Index", id3.Index, Field.Store.YES));
 				doc.Add(new StringField("FullPath", id3.FullPath, Field.Store.YES));
 				doc.Add(new StringField("DateModified", DateTools.DateToString(id3.DateModified, DateTools.Resolution.SECOND), Field.Store.YES));
-				foreach (var kv in id3.Data)
-				{
-					if (kv.Key == "BPM")
-					{
-						int val = Convert.ToInt32(kv.Value);
-						doc.Add(new Int32Field(kv.Key, val, Field.Store.YES));
-					}
-					else if (kv.Key == "Commment")
-					{
-						string val = kv.Value as string;
-						string[] comments = val.Split(new[] { '\\', '/' });
 
-						doc.Add(new TextField(kv.Key, val ?? "", Field.Store.YES));
-						doc.Add(new TextField(kv.Key + "_Split", val ?? "", Field.Store.NO));
+                AddDocProperties(doc, "BPM", id3.BPM);
+                AddDocProperties(doc, "Comment", id3.Comment);
+                AddDocProperties(doc, null, id3.Artist);
+                AddDocProperties(doc, null, id3.Title);
+                AddDocProperties(doc, null, id3.Publisher);
+                AddDocProperties(doc, null, id3.Year);
+                AddDocProperties(doc, null, id3.Genre);
+                AddDocProperties(doc, null, id3.Energy);
+                AddDocProperties(doc, null, id3.Album);
+                AddDocProperties(doc, null, id3.Track);
+                AddDocProperties(doc, null, id3.Remixer);
+                AddDocProperties(doc, null, id3.Composers);
 
-					}
-					else if ((kv?.Value?.GetType() == typeof(int) || kv?.Value?.GetType() == typeof(uint)))
-					{
-						int val = Convert.ToInt32(kv.Value);
-						doc.Add(new Int32Field(kv.Key, val, Field.Store.YES));
-					}
-					else
-					{
-						var val = kv.Value as string;
-						doc.Add(new TextField(kv.Key, val ?? "", Field.Store.YES));
-					}
-				}
-			}
+            }
 			catch(Exception ex)
 			{
 				logger.Error(ex, "Failed to add to Lucene Index");
 			}
 		}
 
+        private static void AddDocProperties(Document doc, string key, object value)
+        {
+            if (key == "BPM")
+            {
+                var val = Convert.ToInt32(value);
+                doc.Add(new Int32Field(key, val, Field.Store.YES));
+            }
+            else if (key == "Commment")
+            {
+                string val = value as string;
+                string[] comments = val.Split(new[] { '\\', '/' });
 
-		public static void AddOrUpdateLuceneIndex(IEnumerable<Id3TagData> tagList)
+                doc.Add(new TextField(key, val ?? "", Field.Store.YES));
+                doc.Add(new TextField(key + "_Split", val ?? "", Field.Store.NO));
+            }
+            else if (value is uint)
+            {
+                var val = Convert.ToInt32(value);
+                doc.Add(new Int32Field(key, val, Field.Store.YES));
+            }
+            else
+            {
+                var val = value as string;
+                doc.Add(new TextField(key, val ?? "", Field.Store.YES));
+            }
+        }
+
+        public static void AddOrUpdateLuceneIndex(IEnumerable<Id3TagData> tagList)
 		{
 			// init lucene
 			var analyzer = new StandardAnalyzer(LUCENE_VER, Lucene.Net.Analysis.Util.CharArraySet.EMPTY_SET);

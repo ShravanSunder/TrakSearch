@@ -22,7 +22,6 @@
         <CommandBinding Command="{x:Static local:MainWindow.PlayerRewindHotkey}" Executed="PlayerRewind_HotKeyCommand"/>
         <CommandBinding Command="{x:Static local:MainWindow.PlayerForwardHotkey}" Executed="PlayerForward_HotKeyCommand"/>
         <CommandBinding Command="{x:Static local:MainWindow.PlayerStopHotkey}" Executed="PlayerStop_HotKeyCommand"/>
-        <CommandBinding Command="{x:Static local:MainWindow.PlaylistAddHotkey}" Executed="PlaylistAdd_HotKeyCommand"/>
         <CommandBinding Command="{x:Static local:MainWindow.PlaylistToggleHotkey}" Executed="PlaylistToggle_Click"/>
     </Window.CommandBindings>
     <Grid>
@@ -100,22 +99,23 @@
                 <TextBox Name="SearchBox" KeyUp="SearchBox_KeyUp" FontSize="14"  TabIndex="4" ></TextBox>
             </DockPanel>
             <Grid>
-                <StackPanel Orientation="Horizontal">
-                    <DataGrid Name="PlaylistData"
+                <DockPanel>
+                    <DataGrid DockPanel.Dock="Left" Name="PlaylistData"
+                              MouseDoubleClick="TrakData_MouseDoubleClick"
                               AlternatingRowBackground="MediumSlateBlue" FontSize="12"
                               SelectionMode="Single"
                               EnableColumnVirtualization="True"  EnableRowVirtualization ="True"
                               Background="DarkSlateBlue"
                               Foreground="GhostWhite"
                               RowBackground="DarkSlateBlue"
-                              MaxWidth="400"
+                              MaxWidth="380"
                               BorderBrush="DarkSlateBlue"
-                              KeyUp="SearchBox_KeyUp"
                               Visibility="Collapsed"
                               AutoGeneratingColumn="Playlist_AutoGeneratingColumn"
                               BorderThickness="2">
                     </DataGrid>
-                    <DataGrid Name="MusicData" MouseDoubleClick="MusicData_MouseDoubleClick"
+                    <DataGrid Name="MusicData"
+                              MouseDoubleClick="TrakData_MouseDoubleClick"
                               AlternatingRowBackground="{StaticResource LightBlack}" FontSize="12"
                               SelectionMode="Single"
                               EnableColumnVirtualization="True"  EnableRowVirtualization ="True"
@@ -123,7 +123,7 @@
                               KeyUp="SearchBox_KeyUp"
                               Sorting="MusicData_Sorting">
                     </DataGrid>
-                </StackPanel>
+                </DockPanel>
                 <Button Name="Folder2Button" Click="FolderButton_Click" Padding="6,2,6,2">Pick Folder</Button>
             </Grid>
         </DockPanel>

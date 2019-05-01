@@ -83,7 +83,7 @@ namespace Shravan.DJ.TrakSearch
                 PlayerStopHotkey.InputGestures.Add(new KeyGesture(Key.Down, ModifierKeys.Control));
 
                 PlaylistToggleHotkey.InputGestures.Add(new KeyGesture(Key.A, ModifierKeys.Control));
-                PlaylistAddHotkey.InputGestures.Add(new KeyGesture(Key.Z, ModifierKeys.Control));
+                //PlaylistAddHotkey.InputGestures.Add(new KeyGesture(Key.Z, ModifierKeys.Control));
 
                 _Player = new MusicPlayer();
 
@@ -198,6 +198,18 @@ namespace Shravan.DJ.TrakSearch
                     SearchBox.SelectAll();
                 }
             }
+            else if ((e.Key == Key.Z && (Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control))
+            {
+                var data = (Id3TagData)MusicData.SelectedItem;
+                if (data != null && !string.IsNullOrEmpty(data.Artist) && !string.IsNullOrEmpty(data.Title)
+                    && !Playlist.Any(p => p.Index == data.Index))
+                {
+                    this.Dispatcher.Invoke(() =>
+                    {
+                        Playlist.Add(data);
+                    });
+                }
+            }
         }
 
         private void ClearSearch()
@@ -296,14 +308,21 @@ namespace Shravan.DJ.TrakSearch
             ClearSearch();
         }
 
-        private void MusicData_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        private void TrakData_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
-            var data = (Id3TagData)MusicData.SelectedItem;
-            var text = data.Title ?? "";
-            text += "  " + data.Artist ?? "";
-            text = GetAlphaNumericOnly(text);
+            try
+            {
+                var data = (Id3TagData)((DataGrid)sender).SelectedItem;
+                var text = data.Title ?? "";
+                text += "  " + data.Artist ?? "";
+                text = GetAlphaNumericOnly(text);
 
-            Clipboard.SetData(DataFormats.Text, text);
+                Clipboard.SetData(DataFormats.Text, text);
+            }
+            catch
+            {
+                // do nothing
+            }
         }
 
         private void FolderButton_Click(object sender, RoutedEventArgs e)
@@ -322,16 +341,10 @@ namespace Shravan.DJ.TrakSearch
                 timer.Start();
 
                 AllTagData.TagList = new System.Collections.Concurrent.ConcurrentBag<Id3TagData>();
-                this.MusicData.ItemsSource = new List<Id3TagData>();
-                this.MusicData.Items.Refresh();
-
                 var folder = dialog.FileName;
-
                 AllTagData.IndexDirectory(folder);
 
-
                 Folder2Button.Visibility = Visibility.Hidden;
-
                 this.MusicData.ItemsSource = AllTagData.TagList.Cast<Id3TagDataBase>();
                 this.MusicData.Items.Refresh();
                 this.ResultCountLabel.Content = AllTagData.TagList.Count();
@@ -489,20 +502,6 @@ namespace Shravan.DJ.TrakSearch
             StopMusic();
         }
 
-        private void PlaylistAdd_HotKeyCommand(object sender, ExecutedRoutedEventArgs e)
-        {
-            var data = (Id3TagData)MusicData.SelectedItem;
-            if (data != null && !string.IsNullOrEmpty(data.Artist) && !string.IsNullOrEmpty(data.Title)
-                && !Playlist.Any(p => p.FullPath == data.FullPath))
-            {
-                this.Dispatcher.Invoke(() =>
-                {
-                    Playlist.Add(data);
-                });
-            }
-        }
-
-
         private void NumberSearchBox_PreviewTextInput(object sender, TextCompositionEventArgs e)
         {
             e.Handled = !NumbersOnly(e.Text);
@@ -528,7 +527,7 @@ namespace Shravan.DJ.TrakSearch
         private static string GetAlphaNumericOnly(string text)
         {
             //alpha numeric with space
-            Regex regex = new Regex(@"/^[\w\-\s]+$/"); //regex that matches disallowed text
+            Regex regex = new Regex(@"[^A-Za-z0-9- ]+"); //regex that matches disallowed text
             return regex.Replace(text, "");
         }
 

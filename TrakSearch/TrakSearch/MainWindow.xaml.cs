@@ -150,34 +150,14 @@ namespace Shravan.DJ.TrakSearch
 
         private void SearchBox_KeyUp(object sender, KeyEventArgs e)
         {
-
-            if (e.Key == Key.Enter)
+            var isSenderDataGrid = sender is DataGrid;
+            if ((e.Key == Key.F && (Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control)
+                || e.Key == Key.F1 || e.Key == Key.F3)
             {
-                AutoSearchTrigger = true;
-
-                if (string.IsNullOrEmpty(SearchBox.Text.Trim())
-                    && string.IsNullOrEmpty(BpmSearchBox.Text.Trim())
-                    && string.IsNullOrEmpty(KeySearchBox.Text.Trim())
-                    && string.IsNullOrEmpty(EnergySearchBox.Text.Trim()))
+                if (SearchBox.Focus())
                 {
-                    ClearSearch();
+                    SearchBox.SelectAll();
                 }
-                else
-                {
-                    SearchMusic(SearchBox.Text, BpmSearchBox.Text, KeySearchBox.Text, EnergySearchBox.Text);
-                }
-            }
-            else if ((((e.Key >= Key.A && e.Key <= Key.Z) || (e.Key >= Key.D0 && e.Key <= Key.D9) || (e.Key >= Key.NumPad0 && e.Key <= Key.NumPad9)
-                    || (e.Key == Key.Back || e.Key == Key.Delete)) && Keyboard.Modifiers == ModifierKeys.None)
-                || ((e.Key == Key.V || e.Key == Key.X) && (Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control))
-            {
-                AutoSearchTrigger = true;
-                SearchKeyCounterForDebounce++;
-            }
-            else if (e.Key == Key.Escape)
-            {
-                AutoSearchTrigger = false;
-                ClearSearch();
             }
             else if (e.Key == Key.Down || e.Key == Key.Up)
             {
@@ -194,28 +174,56 @@ namespace Shravan.DJ.TrakSearch
 
                 DataGridRow row = (DataGridRow)MusicData.ItemContainerGenerator.ContainerFromIndex(MusicData.SelectedIndex);
                 row?.MoveFocus(new TraversalRequest(FocusNavigationDirection.Next));
+            }
 
-            }
-            else if ((e.Key == Key.F && (Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control)
-                || e.Key == Key.F1 || e.Key == Key.F3)
+            if (isSenderDataGrid)
             {
-                if (SearchBox.Focus())
+                if (e.Key == Key.Z)
                 {
-                    SearchBox.SelectAll();
-                }
-            }
-            else if ((e.Key == Key.Z && (Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control))
-            {
-                var data = (Id3TagData)MusicData.SelectedItem;
-                if (data != null && !string.IsNullOrEmpty(data.Artist) && !string.IsNullOrEmpty(data.Title)
-                    && !Playlist.Any(p => p.Index == data.Index))
-                {
-                    this.Dispatcher.Invoke(() =>
+                    var data = (Id3TagData)MusicData.SelectedItem;
+                    if (data != null && !string.IsNullOrEmpty(data.Artist) && !string.IsNullOrEmpty(data.Title)
+                        && !Playlist.Any(p => p.Index == data.Index))
                     {
-                        Playlist.Add(data);
-                    });
+                        this.Dispatcher.Invoke(() =>
+                        {
+                            Playlist.Add(data);
+                        });
+                    }
                 }
             }
+            else
+            {
+                if (e.Key == Key.Enter)
+                {
+                    AutoSearchTrigger = true;
+
+                    if (string.IsNullOrEmpty(SearchBox.Text.Trim())
+                        && string.IsNullOrEmpty(BpmSearchBox.Text.Trim())
+                        && string.IsNullOrEmpty(KeySearchBox.Text.Trim())
+                        && string.IsNullOrEmpty(EnergySearchBox.Text.Trim()))
+                    {
+                        ClearSearch();
+                    }
+                    else
+                    {
+                        SearchMusic(SearchBox.Text, BpmSearchBox.Text, KeySearchBox.Text, EnergySearchBox.Text);
+                    }
+                }
+                else if ((((e.Key >= Key.A && e.Key <= Key.Z) || (e.Key >= Key.D0 && e.Key <= Key.D9) || (e.Key >= Key.NumPad0 && e.Key <= Key.NumPad9)
+                        || (e.Key == Key.Back || e.Key == Key.Delete)) && Keyboard.Modifiers == ModifierKeys.None)
+                    || ((e.Key == Key.V || e.Key == Key.X) && (Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control))
+                {
+                    AutoSearchTrigger = true;
+                    SearchKeyCounterForDebounce++;
+                }
+                else if (e.Key == Key.Escape)
+                {
+                    AutoSearchTrigger = false;
+                    ClearSearch();
+                }
+            }
+
+            System.Diagnostics.Debug.WriteLine(e.Key.ToString());
         }
 
         private void ClearSearch()

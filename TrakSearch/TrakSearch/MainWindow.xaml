@@ -18,6 +18,7 @@
     </Window.Resources>
     <Window.CommandBindings>
         <CommandBinding Command="{x:Static local:MainWindow.SearchHotkey}" Executed="SearchBox_HotKeyCommand"/>
+        <CommandBinding Command="{x:Static local:MainWindow.AdvancedHarmonicsHotkey}" Executed="AdvancedHarmonics_HotKeyCommand"/>
         <CommandBinding Command="{x:Static local:MainWindow.PlayerPlayHotkey}" Executed="PlayerPlay_HotKeyCommand"/>
         <CommandBinding Command="{x:Static local:MainWindow.PlayerRewindHotkey}" Executed="PlayerRewind_HotKeyCommand"/>
         <CommandBinding Command="{x:Static local:MainWindow.PlayerForwardHotkey}" Executed="PlayerForward_HotKeyCommand"/>
@@ -76,6 +77,14 @@
                     <TextBox Name="KeySearchBox"
                              KeyUp="SearchBox_KeyUp" PreviewTextInput="KeySearchBox_PreviewTextInput"
                              FontSize="14" DockPanel.Dock="Left" Width="33" MaxLength="3" TabIndex="2"></TextBox>
+                    <CheckBox Name="HarmonicAdvancedCheckBox"
+                              Click="SearchButton_Click"
+                        VerticalAlignment="Center" Margin="3,1"
+                              ToolTip="Find Advanced Harmonics">
+                        <CheckBox.LayoutTransform>
+                            <ScaleTransform ScaleX="1.5" ScaleY="2" />
+                        </CheckBox.LayoutTransform>
+                    </CheckBox>
                     <Label>Energy</Label>
                     <TextBox Name="EnergySearchBox"
                              KeyUp="SearchBox_KeyUp" PreviewTextInput="NumberSearchBox_PreviewTextInput"

@@ -44,6 +44,8 @@ namespace Shravan.DJ.TrakSearch
         public static RoutedCommand PlaylistAddHotkey = new RoutedCommand();
         public static RoutedCommand PlaylistToggleHotkey = new RoutedCommand();
 
+        public static RoutedCommand AdvancedHarmonicsHotkey = new RoutedCommand();
+
         Mutex SearchingMutex = new Mutex();
         DataGridColumn _MusicDataSortColumn;
 
@@ -72,6 +74,7 @@ namespace Shravan.DJ.TrakSearch
                 WindowTimer.Start();
 
                 SearchHotkey.InputGestures.Add(new KeyGesture(Key.F, ModifierKeys.Control));
+                AdvancedHarmonicsHotkey.InputGestures.Add(new KeyGesture(Key.K, ModifierKeys.Control));
                 //HotKeyCommands.InputGestures.Add(new KeyGesture(Key.D1, ModifierKeys.Alt));
                 //HotKeyCommands.InputGestures.Add(new KeyGesture(Key.D2, ModifierKeys.Alt));
                 //HotKeyCommands.InputGestures.Add(new KeyGesture(Key.D3, ModifierKeys.Alt));
@@ -83,6 +86,9 @@ namespace Shravan.DJ.TrakSearch
                 PlayerStopHotkey.InputGestures.Add(new KeyGesture(Key.Down, ModifierKeys.Control));
 
                 PlaylistToggleHotkey.InputGestures.Add(new KeyGesture(Key.A, ModifierKeys.Control));
+
+
+
                 //PlaylistAddHotkey.InputGestures.Add(new KeyGesture(Key.Z, ModifierKeys.Control));
 
                 _Player = new MusicPlayer();
@@ -238,6 +244,14 @@ namespace Shravan.DJ.TrakSearch
 
         private void SearchMusic(string searchText, string bpmText = null, string keyText = null, string energy = null)
         {
+            //var relatedEnergy = false;
+            //if (RelatedEnergyCheckBox.IsChecked == true)
+            //    relatedEnergy = true;
+
+            var harmonicAdvanced = false;
+            if (HarmonicAdvancedCheckBox.IsChecked == true)
+                harmonicAdvanced = true;
+
             var search = CreateSearchText(searchText, bpmText, keyText, energy);
 
             var task = new Task(() =>
@@ -249,7 +263,7 @@ namespace Shravan.DJ.TrakSearch
 
                 try
                 {
-                    result = SearchEngineService.Search(search);
+                    result = SearchEngineService.Search(search, harmonicAdvanced);
                 }
                 catch (Exception ex)
                 {
@@ -273,7 +287,7 @@ namespace Shravan.DJ.TrakSearch
 
         }
 
-        private string CreateSearchText(string searchText, string bpmText, string keyText, string energyText)
+        private string CreateSearchText(string searchText, string bpmText, string keyText, string energyText, bool relatedEnergy = false)
         {
             var search = new StringBuilder();
             search.Append(searchText + " ");
@@ -288,7 +302,17 @@ namespace Shravan.DJ.TrakSearch
             }
             if (!string.IsNullOrEmpty(energyText))
             {
-                search.Append(" Energy:" + energyText + "starzz*");
+                if (relatedEnergy)
+                {
+                    //int energy = 0;
+                    //int.TryParse(energyText, out energy);
+
+                    //search.Append(" (Energy:" + (energy - 1).ToString() + "starzz*" + " OR " + " Energy:" + (energy + 1).ToString() + "starzz*)");
+                }
+                else
+                {
+                    search.Append(" Energy:" + energyText + "starzz*");
+                }
             }
 
             return search.ToString();
@@ -448,6 +472,15 @@ namespace Shravan.DJ.TrakSearch
         {
             PlayMusic();
         }
+
+        private void AdvancedHarmonics_HotKeyCommand(object sender, ExecutedRoutedEventArgs e)
+        {
+            if (HarmonicAdvancedCheckBox.IsChecked == false)
+                HarmonicAdvancedCheckBox.IsChecked = true;
+            else
+                HarmonicAdvancedCheckBox.IsChecked = false;
+        }
+
 
         private void PlayMusic()
         {

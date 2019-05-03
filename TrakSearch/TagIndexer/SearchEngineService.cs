@@ -136,7 +136,7 @@ namespace Shravan.DJ.TagIndexer
 		}
 
 
-		public static IEnumerable<Id3TagData> Search(string search)
+		public static IEnumerable<Id3TagData> Search(string search, bool harmonicAdvanced = false)
 		{
 			if (string.IsNullOrEmpty(search))
 				return new List<Id3TagData>();
@@ -169,7 +169,7 @@ namespace Shravan.DJ.TagIndexer
 				CreateQueryWithWildCard(LuceneSpecialCharacters, searchTerm, query);
 			}
 
-			CreateKeyQueries(specialTerms, query);
+			CreateKeyQueries(specialTerms, query, harmonicAdvanced);
 			CreateBpmQueries(specialTerms, query);
 
 
@@ -245,10 +245,10 @@ namespace Shravan.DJ.TagIndexer
 
 
 
-		private static IEnumerable<string> CreateKeyQueries(List<string> terms, BooleanQuery query)
+		private static IEnumerable<string> CreateKeyQueries(List<string> terms, BooleanQuery query, bool harmonicAdvanced = false)
 		{
 			var keyInputs = terms.Where(q => q.StartsWith("Key:")).ToList();
-			var keyTerms = GetRelatedKeysTerms(keyInputs);
+			var keyTerms = GetRelatedKeysTerms(keyInputs, harmonicAdvanced);
 			var boolQuery = new BooleanQuery();
 
 			foreach (var k in keyTerms)
@@ -280,13 +280,13 @@ namespace Shravan.DJ.TagIndexer
 
 			foreach (var bpm in bpmTerms.Where(b => b > 0 && b < 220))
 			{
-				query.Add(CreateQueryInt("BPM", bpm, 0.11), Occur.MUST);
+				query.Add(CreateQueryInt("BPM", bpm, 0.9), Occur.MUST);
 			}
 
 			return bpmInputs;
 		}
 
-		public static List<string> GetRelatedKeysTerms(IEnumerable<string> keys)
+		public static List<string> GetRelatedKeysTerms(IEnumerable<string> keys, bool harmonicAdvanced = false)
 		{
 			var result = new List<string>();
 			foreach (var key in keys)
@@ -298,14 +298,26 @@ namespace Shravan.DJ.TagIndexer
 					var num = int.Parse(numStr);
 					var letter = Regex.Replace(key, "[^dDmM]", "");
 
-					if (num >= 1 && num <= 12)
+				    if (num >= 1 && num <= 12)
 					{
 
-						result.Add(key.Replace("Key:", ""));
-						result.Add((num + 1 == 13 ? 1 : num + 1).ToString() + letter);
-						result.Add((num - 1 == 0 ? 12 : num - 1).ToString() + letter);
-						result.Add(num.ToString() + (letter == "m" ? "d" : "m"));
-
+                        if (harmonicAdvanced)
+                        {
+                            //result.Add(key.Replace("Key:", ""));
+                            //harmonic energy 1 semitone
+                            result.Add(FormatKeyNum(num + 7) + letter);
+                            //harmonic energy 2 semitone
+                            result.Add(FormatKeyNum(num + 2) + letter);
+                            //diagonal harmonic
+                            result.Add(FormatKeyNum(num + 1) + (letter == "m" ? "d" : "m"));
+                        }
+                        else
+                        {
+                            result.Add(key.Replace("Key:", ""));
+							result.Add(FormatKeyNum(num+1) + letter);
+							result.Add(FormatKeyNum(num-1) + letter);
+                            result.Add(num.ToString() + (letter == "m" ? "d" : "m"));
+                        }
 					}
 				}
 				catch
@@ -314,6 +326,19 @@ namespace Shravan.DJ.TagIndexer
 
 			return result;
 		}
+
+        public static string FormatKeyNum (int keyNum)
+        {
+            var result = 0;
+            if (keyNum == 12)
+                result = 12;
+            else if (keyNum == 0)
+                result = 12;
+            else
+                result = keyNum % 12;
+
+            return result.ToString();
+        }
 
 
 		public static void InitDirectoryifRequried ()

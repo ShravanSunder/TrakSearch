@@ -129,45 +129,56 @@ namespace Shravan.DJ.TagIndexer
 		}
 
 		public static IEnumerable<Id3TagData> Search(string search, bool harmonicAdvanced = false)
-		{
-			if (string.IsNullOrEmpty(search))
-				return new List<Id3TagData>();
+        {
+            if (string.IsNullOrEmpty(search))
+                return new List<Id3TagData>();
 
-			var bracketKeys = new List<string>() { "(", ")", "\\(\\)" };
-			var logicalKeys = new List<string>() { "+", "-" };
+            var bracketKeys = new List<string>() { "(", ")", "\\(\\)" };
+            var logicalKeys = new List<string>() { "+", "-" };
 
-			//var removeKeys = new List<string>() { "AND", "OR", "NOT" };
-			LuceneSpecialCharacters.AddRange(logicalKeys);
-			LuceneSpecialCharacters.AddRange(bracketKeys);
-			LuceneSpecialCharacters.AddRange(Id3TagData.Fields.Select(s => s + ":"));
+            //var removeKeys = new List<string>() { "AND", "OR", "NOT" };
+            LuceneSpecialCharacters.AddRange(logicalKeys);
+            LuceneSpecialCharacters.AddRange(bracketKeys);
+            LuceneSpecialCharacters.AddRange(Id3TagData.Fields.Select(s => s + ":"));
 
-			search = search.Length > 100 ? search.Substring(0, 99) : search;
+            search = search.Length > 100 ? search.Substring(0, 99) : search;
 
-			var specialTerms = FindSpecialTerms(search);
-			var searchTerm = search;
-			foreach (var s in specialTerms)
-			{
-				searchTerm = searchTerm.Replace(s.Trim(), "");
-			}
+            var specialTerms = FindSpecialTerms(search);
+            var searchTerm = search;
+            foreach (var s in specialTerms)
+            {
+                searchTerm = searchTerm.Replace(s.Trim(), "");
+            }
 
-			var query = new BooleanQuery();
-			if (!string.IsNullOrEmpty(CurrentPartition.Trim()))
-			{
-				query.Add(new WildcardQuery(new Term("Index", CurrentPartition + "*")), Occur.MUST);
-			}
+            var query = new BooleanQuery();
+            if (!string.IsNullOrEmpty(CurrentPartition.Trim()))
+            {
+                query.Add(new WildcardQuery(new Term("Index", CurrentPartition + "*")), Occur.MUST);
+            }
 
-			if (!string.IsNullOrEmpty(searchTerm.Trim()))
-			{
-				CreateQueryWithWildCard(LuceneSpecialCharacters, searchTerm, query);
-			}
+            if (!string.IsNullOrEmpty(searchTerm.Trim()))
+            {
+                CreateQueryWithWildCard(LuceneSpecialCharacters, searchTerm, query);
+            }
 
-			CreateKeyQueries(specialTerms, query, harmonicAdvanced);
-			CreateBpmQueries(specialTerms, query);
+            CreateKeyQuery(specialTerms, query, harmonicAdvanced);
+            CreateBpmQuery(specialTerms, query);
+            CreateYearQuery(specialTerms, query);
 
-			return SearchInternal(query);
-		}
+            return SearchInternal(query);
+        }
 
-		private static void CreateQueryWithWildCard(List<string> restrictedKeys, string searchTerms, BooleanQuery query)
+        private static void CreateYearQuery(List<string> specialTerms, BooleanQuery query)
+        {
+            foreach (var s in specialTerms.Where(w => w.StartsWith("Year:")))
+            {
+                int year = 0;
+                int.TryParse(s.Replace("Year:", ""), out year);
+                query.Add(CreateQueryInt("Year", year), Occur.MUST);
+            }
+        }
+
+        private static void CreateQueryWithWildCard(List<string> restrictedKeys, string searchTerms, BooleanQuery query)
 		{
 			var terms = Regex.Matches(searchTerms, @"[\""].+?[\""]|[^ ]+")
 									 .Cast<Match>()
@@ -189,7 +200,7 @@ namespace Shravan.DJ.TagIndexer
 
 		private static List<string> FindSpecialTerms(string search)
 		{
-			var specialTerms = new[] { "BPM:", "Key:" };
+			var specialTerms = new[] { "BPM:", "Key:", "Year:" };
 			var terms = new List<string>();
 
 			foreach (var s in specialTerms)
@@ -233,7 +244,7 @@ namespace Shravan.DJ.TagIndexer
 			}
 		}
 
-		private static IEnumerable<string> CreateKeyQueries(List<string> terms, BooleanQuery query, bool harmonicAdvanced = false)
+		private static IEnumerable<string> CreateKeyQuery(List<string> terms, BooleanQuery query, bool harmonicAdvanced = false)
 		{
 			var keyInputs = terms.Where(q => q.StartsWith("Key:")).ToList();
 			var keyTerms = KeyTermHelper(keyInputs, harmonicAdvanced);
@@ -250,7 +261,7 @@ namespace Shravan.DJ.TagIndexer
 			return keyInputs;
 		}
 
-		private static IEnumerable<string> CreateBpmQueries(List<string> terms, BooleanQuery query)
+		private static IEnumerable<string> CreateBpmQuery(List<string> terms, BooleanQuery query)
 		{
 			var bpmInputs = terms
 				.Where(q => q.StartsWith("BPM:"));
@@ -479,7 +490,7 @@ namespace Shravan.DJ.TagIndexer
 			}
 		}
 
-		private static NumericRangeQuery<int> CreateQueryInt(string searchField, int value, double range)
+		private static NumericRangeQuery<int> CreateQueryInt(string searchField, int value, double range = 0)
 		{
 			int? min = value - (int)Math.Ceiling(value * range);
 			int? max = value + (int)Math.Ceiling(value * range);

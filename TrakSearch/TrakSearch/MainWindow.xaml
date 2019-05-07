@@ -11,8 +11,8 @@
         WindowStyle="None"
         SizeChanged="Window_SizeChanged"
         PreviewKeyDown="Window_PreviewKeyDown"
-        Closing="Window_Closing">
-
+        Closing="Window_Closing"
+>
     <Window.Resources>
         <SolidColorBrush x:Key="LightBlack" Color="#282828" />
     </Window.Resources>
@@ -93,7 +93,7 @@
                 <StackPanel Orientation="Horizontal" DockPanel.Dock="Right">
                     <Label Name="ResultCountLabel" Width="30" FontSize="10"></Label>
                     <Button Name="CancelButton" DockPanel.Dock="Right" Click="CancelButton_Click" Padding="3,2,3,2">X</Button>
-                    <Button Name="SearchButton" DockPanel.Dock="Right" Click="SearchButton_Click" Padding="6,2,6,2" TabIndex="5">
+                    <Button Name="SearchButton" DockPanel.Dock="Right" Click="SearchButton_Click" Padding="6,2,6,2" TabIndex="10">
                         <Image Source="./Resources/Search-32x32.png" Height="20" Width="20"  />
                     </Button>
                     <Button Name="FolderButton" DockPanel.Dock="Right" Click="FolderButton_Click" Padding="6,2,6,2">
@@ -104,8 +104,12 @@
                         <Image Source="./Resources/window-close-32x32.png" Height="20" Width="20" />
                     </Button>
                 </StackPanel>
+                <Label>Year</Label>
+                <TextBox Name="YearSearchBox"
+                             KeyUp="KeyBindingEvent_KeyUp" PreviewTextInput="NumberSearchBox_PreviewTextInput"
+                             FontSize="14" DockPanel.Dock="Left" Width="40" MaxLength="4" TabIndex="4"></TextBox>
                 <Label>Search</Label>
-                <TextBox Name="SearchBox" KeyUp="KeyBindingEvent_KeyUp" FontSize="14"  TabIndex="4" ></TextBox>
+                <TextBox Name="SearchBox" KeyUp="KeyBindingEvent_KeyUp" FontSize="14"  TabIndex="5" ></TextBox>
             </DockPanel>
             <Grid>
                 <DockPanel>

@@ -137,13 +137,14 @@ namespace Shravan.DJ.TrakSearch
                 return;
             }
 
-            if (!(string.IsNullOrEmpty(SearchBox.Text.Trim())
-                    && string.IsNullOrEmpty(BpmSearchBox.Text.Trim())
-                    && string.IsNullOrEmpty(KeySearchBox.Text.Trim())
-                    && string.IsNullOrEmpty(EnergySearchBox.Text.Trim())))
+            if (!string.IsNullOrEmpty(SearchBox.Text.Trim())
+                    || !string.IsNullOrEmpty(BpmSearchBox.Text.Trim())
+                    || !string.IsNullOrEmpty(KeySearchBox.Text.Trim())
+                    || !string.IsNullOrEmpty(EnergySearchBox.Text.Trim())
+                    || !string.IsNullOrEmpty(YearSearchBox.Text.Trim()))
             {
                 AutoSearchTrigger = false;
-                SearchMusic(SearchBox.Text, BpmSearchBox.Text, KeySearchBox.Text, EnergySearchBox.Text);
+                SearchMusic(SearchBox.Text, BpmSearchBox.Text, KeySearchBox.Text, EnergySearchBox.Text, YearSearchBox.Text);
             }
             else
             {
@@ -203,7 +204,7 @@ namespace Shravan.DJ.TrakSearch
                     }
                     else
                     {
-                        SearchMusic(SearchBox.Text, BpmSearchBox.Text, KeySearchBox.Text, EnergySearchBox.Text);
+                        SearchMusic(SearchBox.Text, BpmSearchBox.Text, KeySearchBox.Text, EnergySearchBox.Text, YearSearchBox.Text);
                     }
                 }
                 else if ((((e.Key >= Key.A && e.Key <= Key.Z) || (e.Key >= Key.D0 && e.Key <= Key.D9) || (e.Key >= Key.NumPad0 && e.Key <= Key.NumPad9)
@@ -245,13 +246,13 @@ namespace Shravan.DJ.TrakSearch
             UpdateMusicDataGrid();
         }
 
-        private void SearchMusic(string searchText, string bpmText = null, string keyText = null, string energy = null)
+        private void SearchMusic(string searchText, string bpmText = null, string keyText = null, string energyText = null, string yearText = null )
         {
             var harmonicAdvanced = false;
             if (HarmonicAdvancedCheckBox.IsChecked == true)
                 harmonicAdvanced = true;
 
-            var search = CreateSearchText(searchText, bpmText, keyText, energy);
+            var search = CreateSearchText(searchText, bpmText, keyText, energyText, yearText);
 
             var task = new Task(() =>
             {
@@ -286,7 +287,7 @@ namespace Shravan.DJ.TrakSearch
 
         }
 
-        private string CreateSearchText(string searchText, string bpmText, string keyText, string energyText, bool relatedEnergy = false)
+        private string CreateSearchText(string searchText, string bpmText, string keyText, string energyText, string yearText, bool relatedEnergy = false)
         {
             var search = new StringBuilder();
             search.Append(searchText + " ");
@@ -313,7 +314,10 @@ namespace Shravan.DJ.TrakSearch
                     search.Append(" Energy:" + energyText + "starzz*");
                 }
             }
-
+            if (!string.IsNullOrEmpty(yearText))
+            {
+                search.Append(" Year:" + yearText);
+            }
             return search.ToString();
         }
 
@@ -401,7 +405,6 @@ namespace Shravan.DJ.TrakSearch
             }
 
             FolderButton.IsEnabled = true;
-
         }
 
         public void StyleDataGrid()

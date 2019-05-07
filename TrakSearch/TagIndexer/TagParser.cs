@@ -68,7 +68,7 @@ namespace Shravan.DJ.TagIndexer
 
 				Task.WaitAll(tasks.ToArray());
 
-				SearchEngineService.AddOrUpdateLuceneIndex(LuceneUpdates);
+				SearchEngineService.AddOrUpdateIndex(LuceneUpdates);
 			}
 			catch (Exception ex)
 			{
@@ -111,7 +111,7 @@ namespace Shravan.DJ.TagIndexer
 						{
 							foreach (var tag in tagDataFromIndex)
 							{
-								SearchEngineService.ClearLuceneIndexRecord(tag);
+								SearchEngineService.ClearLuceneIndex(tag);
 							}
 						}
 

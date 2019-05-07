@@ -34,7 +34,6 @@ namespace Shravan.DJ.TrakSearch
         bool Searching = false;
         ObservableCollection<Id3TagData> Playlist = new ObservableCollection<Id3TagData>();
 
-        //protected WaveformRenderer waveRenderer = new WaveformRenderer();
 
         public static RoutedCommand SearchHotkey = new RoutedCommand();
         public static RoutedCommand PlayerPlayHotkey = new RoutedCommand();
@@ -60,41 +59,16 @@ namespace Shravan.DJ.TrakSearch
             {
                 System.Diagnostics.Process.GetCurrentProcess().PriorityClass = System.Diagnostics.ProcessPriorityClass.BelowNormal;
 
-
                 InitializeComponent();
 
-                this.MusicData.ItemsSource = new List<Id3TagData>();
-                this.MusicData.Items.Refresh();
+                this.MusicDataGrid.ItemsSource = new List<Id3TagData>();
+                this.MusicDataGrid.Items.Refresh();
 
-                KeyTimer = new System.Windows.Threading.DispatcherTimer();
-                KeyTimer.Interval = new TimeSpan(0, 0, 0, 0, 200);
-                KeyTimer.Tick += new EventHandler(Event_KeyTimerTick);
-                KeyTimer.Start();
-
-                WindowTimer.Start();
-
-                SearchHotkey.InputGestures.Add(new KeyGesture(Key.F, ModifierKeys.Control));
-                AdvancedHarmonicsHotkey.InputGestures.Add(new KeyGesture(Key.K, ModifierKeys.Control));
-                //HotKeyCommands.InputGestures.Add(new KeyGesture(Key.D1, ModifierKeys.Alt));
-                //HotKeyCommands.InputGestures.Add(new KeyGesture(Key.D2, ModifierKeys.Alt));
-                //HotKeyCommands.InputGestures.Add(new KeyGesture(Key.D3, ModifierKeys.Alt));
-                //HotKeyCommands.InputGestures.Add(new KeyGesture(Key.D4, ModifierKeys.Alt));
-
-                PlayerPlayHotkey.InputGestures.Add(new KeyGesture(Key.Up, ModifierKeys.Control));
-                PlayerRewindHotkey.InputGestures.Add(new KeyGesture(Key.Left, ModifierKeys.Control));
-                PlayerForwardHotkey.InputGestures.Add(new KeyGesture(Key.Right, ModifierKeys.Control));
-                PlayerStopHotkey.InputGestures.Add(new KeyGesture(Key.Down, ModifierKeys.Control));
-
-                PlaylistToggleHotkey.InputGestures.Add(new KeyGesture(Key.A, ModifierKeys.Control));
-
-
-
-                //PlaylistAddHotkey.InputGestures.Add(new KeyGesture(Key.Z, ModifierKeys.Control));
+                InitKeyBindings();
 
                 _Player = new MusicPlayer();
 
                 SetWindowPosition();
-
                 StyleDataGrid();
             }
             catch (Exception ex)
@@ -113,19 +87,43 @@ namespace Shravan.DJ.TrakSearch
 
         }
 
+        private void InitKeyBindings()
+        {
+            KeyTimer = new System.Windows.Threading.DispatcherTimer();
+            KeyTimer.Interval = new TimeSpan(0, 0, 0, 0, 200);
+            KeyTimer.Tick += new EventHandler(SearchForMusicEvent_KeyTimerTick);
+            KeyTimer.Start();
+
+            WindowTimer.Start();
+
+            SearchHotkey.InputGestures.Add(new KeyGesture(Key.F, ModifierKeys.Control));
+            SearchHotkey.InputGestures.Add(new KeyGesture(Key.F1, ModifierKeys.None));
+
+            AdvancedHarmonicsHotkey.InputGestures.Add(new KeyGesture(Key.F3, ModifierKeys.None));
+            //HotKeyCommands.InputGestures.Add(new KeyGesture(Key.D1, ModifierKeys.Alt));
+            //HotKeyCommands.InputGestures.Add(new KeyGesture(Key.D2, ModifierKeys.Alt));
+            //HotKeyCommands.InputGestures.Add(new KeyGesture(Key.D3, ModifierKeys.Alt));
+            //HotKeyCommands.InputGestures.Add(new KeyGesture(Key.D4, ModifierKeys.Alt));
+
+            PlayerPlayHotkey.InputGestures.Add(new KeyGesture(Key.Up, ModifierKeys.Control));
+            PlayerRewindHotkey.InputGestures.Add(new KeyGesture(Key.Left, ModifierKeys.Control));
+            PlayerForwardHotkey.InputGestures.Add(new KeyGesture(Key.Right, ModifierKeys.Control));
+            PlayerStopHotkey.InputGestures.Add(new KeyGesture(Key.Down, ModifierKeys.Control));
+
+            PlaylistToggleHotkey.InputGestures.Add(new KeyGesture(Key.F2, ModifierKeys.None));
+        }
+
         private void SetWindowPosition()
         {
-
             var height = SystemParameters.WorkArea.Height / 2;
 
             this.Top = SystemParameters.WorkArea.Height / 2;
             this.Left = SystemParameters.WorkArea.Left;
             this.Height = SystemParameters.WorkArea.Height / 2;
             this.Width = SystemParameters.WorkArea.Width;
-
         }
 
-        private void Event_KeyTimerTick(object sender, EventArgs e)
+        private void SearchForMusicEvent_KeyTimerTick(object sender, EventArgs e)
         {
             if (!AutoSearchTrigger)
                 return;
@@ -154,11 +152,11 @@ namespace Shravan.DJ.TrakSearch
             }
         }
 
-        private void SearchBox_KeyUp(object sender, KeyEventArgs e)
+        private void KeyBindingEvent_KeyUp(object sender, KeyEventArgs e)
         {
             var isSenderDataGrid = sender is DataGrid;
             if ((e.Key == Key.F && (Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control)
-                || e.Key == Key.F1 || e.Key == Key.F3)
+                || e.Key == Key.F1)
             {
                 if (SearchBox.Focus())
                 {
@@ -168,17 +166,17 @@ namespace Shravan.DJ.TrakSearch
             else if (e.Key == Key.Down || e.Key == Key.Up)
             {
 
-                if (MusicData.SelectedIndex == 0 && e.Key == Key.Up)
+                if (MusicDataGrid.SelectedIndex == 0 && e.Key == Key.Up)
                 {
                     SearchBox.Focus();
                     return;
                 }
-                else if (MusicData.SelectedIndex < 0)
+                else if (MusicDataGrid.SelectedIndex < 0)
                 {
-                    MusicData.SelectedIndex = 0;
+                    MusicDataGrid.SelectedIndex = 0;
                 }
 
-                DataGridRow row = (DataGridRow)MusicData.ItemContainerGenerator.ContainerFromIndex(MusicData.SelectedIndex);
+                DataGridRow row = (DataGridRow)MusicDataGrid.ItemContainerGenerator.ContainerFromIndex(MusicDataGrid.SelectedIndex);
                 row?.MoveFocus(new TraversalRequest(FocusNavigationDirection.Next));
             }
 
@@ -186,15 +184,8 @@ namespace Shravan.DJ.TrakSearch
             {
                 if (e.Key == Key.Z)
                 {
-                    var data = (Id3TagData)MusicData.SelectedItem;
-                    if (data != null && !string.IsNullOrEmpty(data.Artist) && !string.IsNullOrEmpty(data.Title)
-                        && !Playlist.Any(p => p.Index == data.Index))
-                    {
-                        this.Dispatcher.Invoke(() =>
-                        {
-                            Playlist.Add(data);
-                        });
-                    }
+                    var data = (Id3TagData)MusicDataGrid.SelectedItem;
+                    AddToPlaylist(data);
                 }
             }
             else
@@ -229,7 +220,19 @@ namespace Shravan.DJ.TrakSearch
                 }
             }
 
-            System.Diagnostics.Debug.WriteLine(e.Key.ToString());
+            //System.Diagnostics.Debug.WriteLine(e.Key.ToString());
+        }
+
+        private void AddToPlaylist(Id3TagData data)
+        {
+            if (data != null && !string.IsNullOrEmpty(data.Artist) && !string.IsNullOrEmpty(data.Title)
+                                    && !Playlist.Any(p => p.Index == data.Index))
+            {
+                this.Dispatcher.Invoke(() =>
+                {
+                    Playlist.Add(data);
+                });
+            }
         }
 
         private void ClearSearch()
@@ -239,15 +242,11 @@ namespace Shravan.DJ.TrakSearch
             KeySearchBox.Clear();
             BpmSearchBox.Clear();
 
-            UpdateItemSource();
+            UpdateMusicDataGrid();
         }
 
         private void SearchMusic(string searchText, string bpmText = null, string keyText = null, string energy = null)
         {
-            //var relatedEnergy = false;
-            //if (RelatedEnergyCheckBox.IsChecked == true)
-            //    relatedEnergy = true;
-
             var harmonicAdvanced = false;
             if (HarmonicAdvancedCheckBox.IsChecked == true)
                 harmonicAdvanced = true;
@@ -274,7 +273,7 @@ namespace Shravan.DJ.TrakSearch
                 {
                     this.Dispatcher.Invoke(() =>
                     {
-                        UpdateItemSource(result);
+                        UpdateMusicDataGrid(result);
                     });
                 }
 
@@ -318,21 +317,21 @@ namespace Shravan.DJ.TrakSearch
             return search.ToString();
         }
 
-        private void UpdateItemSource(IEnumerable<Id3TagData> data = null)
+        private void UpdateMusicDataGrid(IEnumerable<Id3TagData> data = null)
         {
             data = data ?? AllTagData.TagList;
 
             this.Dispatcher.Invoke(() =>
             {
-                MusicData.ItemsSource = data;
+                MusicDataGrid.ItemsSource = data;
                 ResultCountLabel.Content = data.Count();
                 if (_MusicDataSortColumn != null)
                 {
-                    MusicData.Items.SortDescriptions.Add(
+                    MusicDataGrid.Items.SortDescriptions.Add(
                         new System.ComponentModel.SortDescription(_MusicDataSortColumn.SortMemberPath, _MusicDataSortColumn.SortDirection ?? System.ComponentModel.ListSortDirection.Ascending));
 
                 }
-                MusicData.Items.Refresh();
+                MusicDataGrid.Items.Refresh();
             });
         }
 
@@ -356,6 +355,7 @@ namespace Shravan.DJ.TrakSearch
                 text = GetAlphaNumericOnly(text);
 
                 Clipboard.SetData(DataFormats.Text, text);
+                AddToPlaylist(data);
             }
             catch
             {
@@ -383,17 +383,17 @@ namespace Shravan.DJ.TrakSearch
                 AllTagData.IndexDirectory(folder);
 
                 Folder2Button.Visibility = Visibility.Hidden;
-                this.MusicData.ItemsSource = AllTagData.TagList.Cast<Id3TagDataBase>();
-                this.MusicData.Items.Refresh();
+                this.MusicDataGrid.ItemsSource = AllTagData.TagList.Cast<Id3TagDataBase>();
+                this.MusicDataGrid.Items.Refresh();
                 this.ResultCountLabel.Content = AllTagData.TagList.Count();
 
-                var bpmSort = MusicData.Columns.FirstOrDefault(w => w.Header.ToString() == "BPM");
+                var bpmSort = MusicDataGrid.Columns.FirstOrDefault(w => w.Header.ToString() == "BPM");
                 if (bpmSort != null)
                 {
                     _MusicDataSortColumn = bpmSort;
                 }
 
-                UpdateItemSource();
+                UpdateMusicDataGrid();
 
                 StyleDataGrid();
                 timer.Stop();
@@ -406,7 +406,7 @@ namespace Shravan.DJ.TrakSearch
 
         public void StyleDataGrid()
         {
-            var dataGrid = MusicData;
+            var dataGrid = MusicDataGrid;
 
             var largeColumn = new List<string> { "Comment" };
             var smallColumn = new List<string> { "BPM", "Key", "Energy", "Year", "Track" };
@@ -486,7 +486,7 @@ namespace Shravan.DJ.TrakSearch
         {
             try
             {
-                var data = (Id3TagData)MusicData.SelectedItem;
+                var data = (Id3TagData)MusicDataGrid.SelectedItem;
                 var device = MusicPlayer.GetDefaultRenderDevice();
                 if (data != null)
                 {
@@ -506,7 +506,6 @@ namespace Shravan.DJ.TrakSearch
 
                 //    Waveform.Source = waveRenderer.DrawNormalizedAudio(data.FullPath, Convert.ToInt32(Waveform.Height), Convert.ToInt32(Waveform.Width));
                 //});
-
 
             }
             catch (Exception ex)
@@ -574,8 +573,8 @@ namespace Shravan.DJ.TrakSearch
         private static string GetAlphaNumericOnly(string text)
         {
             //alpha numeric with space
-            Regex regex = new Regex(@"[^A-Za-z0-9- ]+"); //regex that matches disallowed text
-            return regex.Replace(text, "");
+            Regex regex = new Regex(@"[^A-Za-z0-9- ']+"); //regex that matches disallowed text
+            return regex.Replace(text, " ");
         }
 
 
@@ -635,8 +634,6 @@ namespace Shravan.DJ.TrakSearch
                 //Properties.Settings.Default.Save();
             }
 
-
-
         }
 
         private void PlayIndicator_Click(object sender, RoutedEventArgs e)
@@ -652,8 +649,6 @@ namespace Shravan.DJ.TrakSearch
 
             PlayIndicator.UpdateLayout();
         }
-
-
 
         private void MusicData_Sorting(object sender, DataGridSortingEventArgs e)
         {

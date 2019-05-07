@@ -23,12 +23,10 @@ namespace Shravan.DJ.TagIndexer
 		private readonly static Logger logger = LogManager.GetCurrentClassLogger(); // creates a logger using the class name
 
 
-		public static List<string> LuceneSpecialCharacters = new List<string>() { "*", "?", "~", "\"", "&&", "||", "!", "^", "!", ":", "{", "}", "!" };
-		//+- && || !( ) {
-		//} [ ] ^ " ~ * ? : \
+		public static List<string> LuceneSpecialCharacters = new List<string>()
+            { "*", "?", "~", "\"", "&&", "||", "!", "^", "!", ":", "{", "}", "!" };
 
-		private static IndexSearcher _IndexSearcher = null;
-
+        private static IndexSearcher _IndexSearcher = null;
 		protected static IndexSearcher Searcher
 		{
 			get
@@ -44,11 +42,7 @@ namespace Shravan.DJ.TagIndexer
 
 		public static string CurrentPartition { get; internal set; }
 
-
-
-
 		protected static Lucene.Net.Util.LuceneVersion LUCENE_VER = Lucene.Net.Util.LuceneVersion.LUCENE_48;
-
 		protected static string _luceneDir = System.IO.Path.GetTempPath() + @"\TrakSearch.Lucene.v2." + Environment.UserName.Replace(" ",".");
 		protected static FSDirectory _directoryTemp;
 		protected static FSDirectory _directory
@@ -64,12 +58,12 @@ namespace Shravan.DJ.TagIndexer
 		}
 
 
-		public static void ClearLuceneIndexRecord(Id3TagData tag)
+		public static void ClearLuceneIndex(Id3TagData tag)
 		{
-			ClearLuceneIndexRecord(tag.Index);
+			ClearLuceneIndex(tag.Index);
 		}
 
-		public static void ClearLuceneIndexRecord(string Index)
+		public static void ClearLuceneIndex(string Index)
 		{
 			// init lucene
 			var analyzer = new StandardAnalyzer(LUCENE_VER);
@@ -107,7 +101,6 @@ namespace Shravan.DJ.TagIndexer
 			return true;
 		}
 
-
 		protected static Query ParseQuery(string searchQuery, QueryParser parser)
 		{
 			Query query;
@@ -134,7 +127,6 @@ namespace Shravan.DJ.TagIndexer
 		{
 
 		}
-
 
 		public static IEnumerable<Id3TagData> Search(string search, bool harmonicAdvanced = false)
 		{
@@ -171,8 +163,6 @@ namespace Shravan.DJ.TagIndexer
 
 			CreateKeyQueries(specialTerms, query, harmonicAdvanced);
 			CreateBpmQueries(specialTerms, query);
-
-
 
 			return SearchInternal(query);
 		}
@@ -243,12 +233,10 @@ namespace Shravan.DJ.TagIndexer
 			}
 		}
 
-
-
 		private static IEnumerable<string> CreateKeyQueries(List<string> terms, BooleanQuery query, bool harmonicAdvanced = false)
 		{
 			var keyInputs = terms.Where(q => q.StartsWith("Key:")).ToList();
-			var keyTerms = GetRelatedKeysTerms(keyInputs, harmonicAdvanced);
+			var keyTerms = KeyTermHelper(keyInputs, harmonicAdvanced);
 			var boolQuery = new BooleanQuery();
 
 			foreach (var k in keyTerms)
@@ -276,17 +264,15 @@ namespace Shravan.DJ.TagIndexer
 					return bpm;
 				});
 
-
-
 			foreach (var bpm in bpmTerms.Where(b => b > 0 && b < 220))
 			{
-				query.Add(CreateQueryInt("BPM", bpm, 0.9), Occur.MUST);
+				query.Add(CreateQueryInt("BPM", bpm, 0.09), Occur.MUST);
 			}
 
 			return bpmInputs;
 		}
 
-		public static List<string> GetRelatedKeysTerms(IEnumerable<string> keys, bool harmonicAdvanced = false)
+		public static List<string> KeyTermHelper(IEnumerable<string> keys, bool harmonicAdvanced = false)
 		{
 			var result = new List<string>();
 			foreach (var key in keys)
@@ -368,7 +354,7 @@ namespace Shravan.DJ.TagIndexer
 		}
 
 
-		public static void AddLuceneIndex(IEnumerable<Id3TagData> tagList)
+		public static void AddIndex(IEnumerable<Id3TagData> tagList)
 		{
 			// init lucene
 			var analyzer = new StandardAnalyzer(LUCENE_VER, Lucene.Net.Analysis.Util.CharArraySet.EMPTY_SET);
@@ -379,7 +365,7 @@ namespace Shravan.DJ.TagIndexer
 				foreach (var tag in tagList)
 				{
 					var doc = new Document();
-					PopulateLuceneDoc(tag, doc);
+					NewIndex(tag, doc);
 					docs.Add(doc);
 				}
 
@@ -393,7 +379,7 @@ namespace Shravan.DJ.TagIndexer
 			}
 		}
 
-		private static void DeleteLuceneIndex(Id3TagData id3, IndexWriter writer)
+		private static void DeleteIndex(Id3TagData id3, IndexWriter writer)
 		{
 			// remove older index entry
 
@@ -402,7 +388,7 @@ namespace Shravan.DJ.TagIndexer
 
 		}
 
-		private static void AddOrUpdateLuceneIndex(Id3TagData id3, IndexWriter writer)
+		private static void AddOrUpdateIndex(Id3TagData id3, IndexWriter writer)
 		{
 			// remove older index entry
 
@@ -411,13 +397,13 @@ namespace Shravan.DJ.TagIndexer
 
 			// add new index entry
 			var doc = new Document();
-			PopulateLuceneDoc(id3, doc);
+			NewIndex(id3, doc);
 
 			// add entry to index
 			writer.AddDocument(doc);
 		}
 
-		private static void PopulateLuceneDoc(Id3TagData id3, Document doc)
+		private static void NewIndex(Id3TagData id3, Document doc)
 		{
 			try
 			{
@@ -426,18 +412,18 @@ namespace Shravan.DJ.TagIndexer
 				doc.Add(new StringField("FullPath", id3.FullPath, Field.Store.YES));
 				doc.Add(new StringField("DateModified", DateTools.DateToString(id3.DateModified, DateTools.Resolution.SECOND), Field.Store.YES));
 
-                AddDocProperties(doc, "BPM", id3.BPM);
-                AddDocProperties(doc, "Comment", id3.Comment);
-                AddDocProperties(doc, "Artist", id3.Artist);
-                AddDocProperties(doc, "Title", id3.Title);
-                AddDocProperties(doc, "Publisher", id3.Publisher);
-                AddDocProperties(doc, "Year", id3.Year);
-                AddDocProperties(doc, "Key", id3.Key);
-                AddDocProperties(doc, "Genre", id3.Genre);
-                AddDocProperties(doc, "Energy", id3.Energy);
-                AddDocProperties(doc, "Album", id3.Album);
-                AddDocProperties(doc, "Track", id3.Track);
-                AddDocProperties(doc, "Remixer", id3.Remixer);
+                NewIndexProperty(doc, "BPM", id3.BPM);
+                NewIndexProperty(doc, "Comment", id3.Comment);
+                NewIndexProperty(doc, "Artist", id3.Artist);
+                NewIndexProperty(doc, "Title", id3.Title);
+                NewIndexProperty(doc, "Publisher", id3.Publisher);
+                NewIndexProperty(doc, "Year", id3.Year);
+                NewIndexProperty(doc, "Key", id3.Key);
+                NewIndexProperty(doc, "Genre", id3.Genre);
+                NewIndexProperty(doc, "Energy", id3.Energy);
+                NewIndexProperty(doc, "Album", id3.Album);
+                NewIndexProperty(doc, "Track", id3.Track);
+                NewIndexProperty(doc, "Remixer", id3.Remixer);
 
             }
 			catch(Exception ex)
@@ -446,7 +432,7 @@ namespace Shravan.DJ.TagIndexer
 			}
 		}
 
-        private static void AddDocProperties(Document doc, string key, object value)
+        private static void NewIndexProperty(Document doc, string key, object value)
         {
             if (key == "BPM")
             {
@@ -473,7 +459,7 @@ namespace Shravan.DJ.TagIndexer
             }
         }
 
-        public static void AddOrUpdateLuceneIndex(IEnumerable<Id3TagData> tagList)
+        public static void AddOrUpdateIndex(IEnumerable<Id3TagData> tagList)
 		{
 			// init lucene
 			var analyzer = new StandardAnalyzer(LUCENE_VER, Lucene.Net.Analysis.Util.CharArraySet.EMPTY_SET);
@@ -482,7 +468,7 @@ namespace Shravan.DJ.TagIndexer
 				// add data to lucene search index (replaces older entry if any)
 				foreach (var tag in tagList)
 				{
-					AddOrUpdateLuceneIndex(tag, writer);
+					AddOrUpdateIndex(tag, writer);
 				}
 
 				// close handles
@@ -508,7 +494,6 @@ namespace Shravan.DJ.TagIndexer
 			return null;
 
 		}
-
 
 		private static Query CreateQuery(string searchQuery, string searchField = "")
 		{
@@ -600,14 +585,11 @@ namespace Shravan.DJ.TagIndexer
 			return result;
 		}
 
-
-
-		internal static int GetIndexCount()
+   		internal static int GetIndexCount()
 		{
 			var reader = DirectoryReader.Open(_directory);
 			return reader.MaxDoc;
 		}
-
 
 		internal static IEnumerable<Id3TagData> GetAllIndexRecords()
 		{

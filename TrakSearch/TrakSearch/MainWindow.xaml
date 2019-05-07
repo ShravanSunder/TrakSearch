@@ -71,11 +71,11 @@
                     </ToggleButton>
                     <Label>BPM</Label>
                     <TextBox Name="BpmSearchBox"
-                             KeyUp="SearchBox_KeyUp" PreviewTextInput="NumberSearchBox_PreviewTextInput"
+                             KeyUp="KeyBindingEvent_KeyUp" PreviewTextInput="NumberSearchBox_PreviewTextInput"
                              FontSize="14" DockPanel.Dock="Left" Width="33" MaxLength="3" TabIndex="1"></TextBox>
                     <Label>Key</Label>
                     <TextBox Name="KeySearchBox"
-                             KeyUp="SearchBox_KeyUp" PreviewTextInput="KeySearchBox_PreviewTextInput"
+                             KeyUp="KeyBindingEvent_KeyUp" PreviewTextInput="KeySearchBox_PreviewTextInput"
                              FontSize="14" DockPanel.Dock="Left" Width="33" MaxLength="3" TabIndex="2"></TextBox>
                     <CheckBox Name="HarmonicAdvancedCheckBox"
                               Click="SearchButton_Click"
@@ -87,7 +87,7 @@
                     </CheckBox>
                     <Label>Energy</Label>
                     <TextBox Name="EnergySearchBox"
-                             KeyUp="SearchBox_KeyUp" PreviewTextInput="NumberSearchBox_PreviewTextInput"
+                             KeyUp="KeyBindingEvent_KeyUp" PreviewTextInput="NumberSearchBox_PreviewTextInput"
                              FontSize="14" DockPanel.Dock="Left" Width="33" MaxLength="1" TabIndex="3"></TextBox>
                 </StackPanel>
                 <StackPanel Orientation="Horizontal" DockPanel.Dock="Right">
@@ -105,7 +105,7 @@
                     </Button>
                 </StackPanel>
                 <Label>Search</Label>
-                <TextBox Name="SearchBox" KeyUp="SearchBox_KeyUp" FontSize="14"  TabIndex="4" ></TextBox>
+                <TextBox Name="SearchBox" KeyUp="KeyBindingEvent_KeyUp" FontSize="14"  TabIndex="4" ></TextBox>
             </DockPanel>
             <Grid>
                 <DockPanel>
@@ -123,13 +123,13 @@
                               AutoGeneratingColumn="Playlist_AutoGeneratingColumn"
                               BorderThickness="2">
                     </DataGrid>
-                    <DataGrid Name="MusicData"
+                    <DataGrid Name="MusicDataGrid"
                               MouseDoubleClick="TrakData_MouseDoubleClick"
                               AlternatingRowBackground="{StaticResource LightBlack}" FontSize="12"
                               SelectionMode="Single"
                               EnableColumnVirtualization="True"  EnableRowVirtualization ="True"
                               MaxWidth="3840" MaxHeight="2160"
-                              KeyUp="SearchBox_KeyUp"
+                              KeyUp="KeyBindingEvent_KeyUp"
                               Sorting="MusicData_Sorting">
                     </DataGrid>
                 </DockPanel>

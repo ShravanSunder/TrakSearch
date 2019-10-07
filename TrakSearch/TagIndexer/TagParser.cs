@@ -14,6 +14,7 @@ using TagLib.Mpeg;
 using Tag = TagLib.Id3v2.Tag;
 using System.Collections.Concurrent;
 using NLog;
+using System.Threading;
 
 namespace Shravan.DJ.TagIndexer
 {
@@ -22,7 +23,7 @@ namespace Shravan.DJ.TagIndexer
 		public ConcurrentBag<Id3TagData> TagList;
 		protected ConcurrentBag<Id3TagData> LuceneUpdates;
 
-		const int BATCH_SIZE = 100;
+		const int BATCH_SIZE = 200;
 
 		public TagParser()
 		{
@@ -64,7 +65,8 @@ namespace Shravan.DJ.TagIndexer
 					tasks.Add(t);
 					t.Start();
 					batchCount += BATCH_SIZE;
-				}
+                    Thread.Sleep(1);
+                }
 
 				Task.WaitAll(tasks.ToArray());
 
@@ -88,13 +90,15 @@ namespace Shravan.DJ.TagIndexer
 			var updateIndex = new List<Id3TagData>();
 
 			foreach (var file in batch)
-			{
 				IndexFile(file, updateIndex);
-			}
+
+            Thread.Sleep(1);
 
 			foreach (var t in updateIndex)
 				LuceneUpdates.Add(t);
-		}
+
+            Thread.Sleep(1);
+        }
 
 		public void IndexFile(FileInfo fileInfo, List<Id3TagData> updateIndex)
 		{

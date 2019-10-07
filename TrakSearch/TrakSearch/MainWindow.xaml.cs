@@ -57,7 +57,9 @@ namespace Shravan.DJ.TrakSearch
         {
             try
             {
-                System.Diagnostics.Process.GetCurrentProcess().PriorityClass = System.Diagnostics.ProcessPriorityClass.BelowNormal;
+                var proc = System.Diagnostics.Process.GetCurrentProcess();
+                proc.PriorityClass = System.Diagnostics.ProcessPriorityClass.BelowNormal;
+                proc.ProcessorAffinity = (IntPtr)0x0003;
 
                 InitializeComponent();
 
@@ -141,10 +143,11 @@ namespace Shravan.DJ.TrakSearch
                     || !string.IsNullOrEmpty(BpmSearchBox.Text.Trim())
                     || !string.IsNullOrEmpty(KeySearchBox.Text.Trim())
                     || !string.IsNullOrEmpty(EnergySearchBox.Text.Trim())
-                    || !string.IsNullOrEmpty(YearSearchBox.Text.Trim()))
+                    || !string.IsNullOrEmpty(YearSearchBox.Text.Trim())
+                    || !string.IsNullOrEmpty(NotSearchBox.Text.Trim()))
             {
                 AutoSearchTrigger = false;
-                SearchMusic(SearchBox.Text, BpmSearchBox.Text, KeySearchBox.Text, EnergySearchBox.Text, YearSearchBox.Text);
+                SearchMusic(SearchBox.Text, BpmSearchBox.Text, KeySearchBox.Text, EnergySearchBox.Text, YearSearchBox.Text, NotSearchBox.Text);
             }
             else
             {
@@ -156,6 +159,7 @@ namespace Shravan.DJ.TrakSearch
         private void KeyBindingEvent_KeyUp(object sender, KeyEventArgs e)
         {
             var isSenderDataGrid = sender is DataGrid;
+            var isSenderCheckbox = sender is CheckBox;
             if ((e.Key == Key.F && (Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control)
                 || e.Key == Key.F1)
             {
@@ -189,6 +193,10 @@ namespace Shravan.DJ.TrakSearch
                     AddToPlaylist(data);
                 }
             }
+            else if (isSenderCheckbox)
+            {
+                SearchMusic(SearchBox.Text, BpmSearchBox.Text, KeySearchBox.Text, EnergySearchBox.Text, YearSearchBox.Text, NotSearchBox.Text);
+            }
             else
             {
                 if (e.Key == Key.Enter)
@@ -204,7 +212,7 @@ namespace Shravan.DJ.TrakSearch
                     }
                     else
                     {
-                        SearchMusic(SearchBox.Text, BpmSearchBox.Text, KeySearchBox.Text, EnergySearchBox.Text, YearSearchBox.Text);
+                        SearchMusic(SearchBox.Text, BpmSearchBox.Text, KeySearchBox.Text, EnergySearchBox.Text, YearSearchBox.Text, NotSearchBox.Text);
                     }
                 }
                 else if ((((e.Key >= Key.A && e.Key <= Key.Z) || (e.Key >= Key.D0 && e.Key <= Key.D9) || (e.Key >= Key.NumPad0 && e.Key <= Key.NumPad9)
@@ -220,8 +228,6 @@ namespace Shravan.DJ.TrakSearch
                     ClearSearch();
                 }
             }
-
-            //System.Diagnostics.Debug.WriteLine(e.Key.ToString());
         }
 
         private void AddToPlaylist(Id3TagData data)
@@ -246,13 +252,13 @@ namespace Shravan.DJ.TrakSearch
             UpdateMusicDataGrid();
         }
 
-        private void SearchMusic(string searchText, string bpmText = null, string keyText = null, string energyText = null, string yearText = null )
+        private void SearchMusic(string searchText, string bpmText, string keyText, string energyText, string yearText, string notText)
         {
             var harmonicAdvanced = false;
             if (HarmonicAdvancedCheckBox.IsChecked == true)
                 harmonicAdvanced = true;
 
-            var search = CreateSearchText(searchText, bpmText, keyText, energyText, yearText);
+            var search = CreateSearchText(searchText, bpmText, keyText, energyText, yearText, notText);
 
             var task = new Task(() =>
             {
@@ -287,7 +293,7 @@ namespace Shravan.DJ.TrakSearch
 
         }
 
-        private string CreateSearchText(string searchText, string bpmText, string keyText, string energyText, string yearText, bool relatedEnergy = false)
+        private string CreateSearchText(string searchText, string bpmText, string keyText, string energyText, string yearText, string notText, bool relatedEnergy = false)
         {
             var search = new StringBuilder();
             search.Append(searchText + " ");
@@ -299,6 +305,12 @@ namespace Shravan.DJ.TrakSearch
             if (!string.IsNullOrEmpty(keyText))
             {
                 search.Append(" Key:" + keyText);
+            }
+            if (!string.IsNullOrEmpty(notText))
+            {
+                search.Append(" -Artist:" + notText.Trim() + "*");
+                search.Append(" -Title:" + notText.Trim() + "*");
+                search.Append(" -Comment:" + notText.Trim() + "*");
             }
             if (!string.IsNullOrEmpty(energyText))
             {
@@ -341,7 +353,7 @@ namespace Shravan.DJ.TrakSearch
 
         private void SearchButton_Click(object sender, RoutedEventArgs e)
         {
-            SearchMusic(SearchBox.Text);
+            SearchMusic(SearchBox.Text, BpmSearchBox.Text, KeySearchBox.Text, EnergySearchBox.Text, YearSearchBox.Text, NotSearchBox.Text);
         }
 
         private void CancelButton_Click(object sender, RoutedEventArgs e)
@@ -382,26 +394,34 @@ namespace Shravan.DJ.TrakSearch
                 var timer = new Stopwatch();
                 timer.Start();
 
-                AllTagData.TagList = new System.Collections.Concurrent.ConcurrentBag<Id3TagData>();
-                var folder = dialog.FileName;
-                AllTagData.IndexDirectory(folder);
-
-                Folder2Button.Visibility = Visibility.Hidden;
-                this.MusicDataGrid.ItemsSource = AllTagData.TagList.Cast<Id3TagDataBase>();
-                this.MusicDataGrid.Items.Refresh();
-                this.ResultCountLabel.Content = AllTagData.TagList.Count();
-
-                var bpmSort = MusicDataGrid.Columns.FirstOrDefault(w => w.Header.ToString() == "BPM");
-                if (bpmSort != null)
+                try
                 {
-                    _MusicDataSortColumn = bpmSort;
+
+                    AllTagData.TagList = new System.Collections.Concurrent.ConcurrentBag<Id3TagData>();
+                    var folder = dialog.FileName;
+                    AllTagData.IndexDirectory(folder);
+
+                    Folder2Button.Visibility = Visibility.Hidden;
+                    this.MusicDataGrid.ItemsSource = AllTagData.TagList.Cast<Id3TagDataBase>();
+                    this.MusicDataGrid.Items.Refresh();
+                    this.ResultCountLabel.Content = AllTagData.TagList.Count();
+
+                    var bpmSort = MusicDataGrid.Columns.FirstOrDefault(w => w.Header.ToString() == "BPM");
+                    if (bpmSort != null)
+                    {
+                        _MusicDataSortColumn = bpmSort;
+                    }
+
+                    UpdateMusicDataGrid();
+
+                    StyleDataGrid();
+                    timer.Stop();
+                    var time = timer.ElapsedMilliseconds;
                 }
-
-                UpdateMusicDataGrid();
-
-                StyleDataGrid();
-                timer.Stop();
-                var time = timer.ElapsedMilliseconds;
+                catch
+                {
+                    //something went wrong
+                }
             }
 
             FolderButton.IsEnabled = true;

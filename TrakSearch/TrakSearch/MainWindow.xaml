@@ -108,6 +108,8 @@
                 <TextBox Name="YearSearchBox"
                              KeyUp="KeyBindingEvent_KeyUp" PreviewTextInput="NumberSearchBox_PreviewTextInput"
                              FontSize="14" DockPanel.Dock="Left" Width="40" MaxLength="4" TabIndex="4"></TextBox>
+                <Label>Not</Label>
+                <TextBox Name="NotSearchBox" Width="150" MaxWidth="250" KeyUp="KeyBindingEvent_KeyUp" FontSize="14"  TabIndex="6" ></TextBox>
                 <Label>Search</Label>
                 <TextBox Name="SearchBox" KeyUp="KeyBindingEvent_KeyUp" FontSize="14"  TabIndex="5" ></TextBox>
             </DockPanel>

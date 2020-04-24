@@ -43,7 +43,7 @@ namespace Shravan.DJ.TagIndexer
 		public static string CurrentPartition { get; internal set; }
 
 		protected static Lucene.Net.Util.LuceneVersion LUCENE_VER = Lucene.Net.Util.LuceneVersion.LUCENE_48;
-		protected static string _luceneDir = System.IO.Path.GetTempPath() + @"\TrakSearch.Lucene.v2." + Environment.UserName.Replace(" ",".");
+		protected static string _luceneDir = System.IO.Path.GetTempPath() + @"\TrakSearch.Lucene.v2.1" + Environment.UserName.Replace(" ",".");
 		protected static FSDirectory _directoryTemp;
 		protected static FSDirectory _directory
 		{

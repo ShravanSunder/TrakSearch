@@ -37,12 +37,6 @@
     <Reference Include="CSCore.Visualization, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\CSCore.Visualization.0.8.9\lib\CSCore.Visualization.dll</HintPath>
     </Reference>
-    <Reference Include="J2N, Version=2.0.0.0, Culture=neutral, PublicKeyToken=f39447d697a969af, processorArchitecture=MSIL">
-      <HintPath>..\packages\J2N.2.0.0-beta-0007\lib\net45\J2N.dll</HintPath>
-    </Reference>
-    <Reference Include="Lucene.Net, Version=4.0.0.0, Culture=neutral, PublicKeyToken=85089178b9ac3181, processorArchitecture=MSIL">
-      <HintPath>..\packages\Lucene.Net.4.8.0-beta00007\lib\net45\Lucene.Net.dll</HintPath>
-    </Reference>
     <Reference Include="NAudio, Version=1.10.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\NAudio.1.10.0\lib\net35\NAudio.dll</HintPath>
     </Reference>
@@ -67,7 +61,6 @@
     <Compile Include="WaveformRenderer.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="app.config" />
     <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
